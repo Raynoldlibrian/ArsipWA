@@ -472,7 +472,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
       <div class="card-top">
         <div class="card-meta" style="margin-left:0">
           <div class="card-title">{{ doc.namaFile }}</div>
-          <div class="card-sub">{{ doc.perihal || doc.source || '—' }}</div>
+          <div class="card-sub" v-if="doc.perihal">{{ doc.perihal }}</div>
+          <div class="card-source" v-if="doc.source">📍 {{ doc.source }}</div>
           <div class="tags">
             <span class="tag" :class="tagClass(doc.kategori)">{{ doc.kategori }}</span>
             <span class="tag" :class="statusTagClass(doc.status)">{{ doc.status }}</span>
