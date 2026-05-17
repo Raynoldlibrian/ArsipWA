@@ -470,11 +470,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   <div class="card-list" v-else-if="docs.length > 0">
     <div class="doc-card" v-for="doc in docs" :key="doc.fileId" @click="openModal(doc)">
       <div class="card-top">
-        <div class="file-thumb" :class="thumbClass(doc.kategori)">
-          {{ thumbIcon(doc.kategori) }}
-          <span class="file-thumb-ext">{{ extLabel(doc.kategori) }}</span>
-        </div>
-        <div class="card-meta">
+        <div class="card-meta" style="margin-left:0">
           <div class="card-title">{{ doc.namaFile }}</div>
           <div class="card-sub">{{ doc.perihal || doc.source || '—' }}</div>
           <div class="tags">
@@ -485,7 +481,10 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
       </div>
       <div class="card-bot">
         <div>
-          <div class="card-date">{{ formatDate(doc.tanggal) }}</div>
+          <div class="card-date" v-if="doc.tanggalSurat" style="color:var(--accent);font-weight:600">
+            📅 {{ formatDate(doc.tanggalSurat) }}
+          </div>
+          <div class="card-date" v-else style="opacity:0.5">{{ formatDate(doc.tanggal) }}</div>
         </div>
         <div class="share-btn" @click.stop="quickShare(doc)">🔗</div>
       </div>
@@ -580,8 +579,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
         <div class="edit-panel">
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Tanggal</label>
-              <input class="form-input" type="date" v-model="form.tanggal">
+              <label class="form-label">Tanggal Sync</label>
+              <input class="form-input" type="date" v-model="form.tanggal" readonly style="opacity:0.6;cursor:not-allowed">
             </div>
             <div class="form-group">
               <label class="form-label">Kategori</label>
@@ -703,13 +702,24 @@ createApp({
     const statCards = computed(() => {
       if (!stats.value) return [];
       const s = stats.value;
+      // Hitung total Excel + PowerPoint + ZIP
+      const excelCount = (s.byKategori?.["Excel"] || 0);
+      const pptCount   = (s.byKategori?.["PowerPoint"] || 0);
+      const zipCount   = (s.byKategori?.["ZIP/RAR"] || 0);
+      const wordCount  = (s.byKategori?.["Word"] || 0);
+      const pdfCount   = (s.byKategori?.["PDF"] || 0);
+      const lainnya    = s.total - pdfCount - wordCount - excelCount - pptCount - zipCount;
       return [
-        { icon:"📄", val: s.total,                          label:"Total"   },
-        { icon:"📕", val: s.byKategori?.["PDF"]       || 0, label:"PDF"     },
-        { icon:"📝", val: s.byKategori?.["Word"]      || 0, label:"Word"    },
-        { icon:"📊", val: s.byKategori?.["Excel"]     || 0, label:"Excel"   },
-        { icon:"🆕", val: s.byStatus?.["BARU"]        || 0, label:"Baru"    },
-        { icon:"✅", val: s.byStatus?.["SELESAI"]     || 0, label:"Selesai" },
+        { icon:"📄", val: s.total,                                    label:"Total"    },
+        { icon:"📕", val: pdfCount,                                   label:"PDF"      },
+        { icon:"📝", val: wordCount,                                  label:"Word"     },
+        { icon:"📊", val: excelCount,                                 label:"Excel"    },
+        { icon:"📊", val: pptCount,                                   label:"PPT"      },
+        { icon:"🗜️", val: zipCount,                                   label:"ZIP/RAR"  },
+        { icon:"🆕", val: s.byStatus?.["BARU"]        || 0,          label:"Baru"     },
+        { icon:"⚙️", val: s.byStatus?.["DIPROSES"]    || 0,          label:"Diproses" },
+        { icon:"✅", val: s.byStatus?.["SELESAI"]     || 0,          label:"Selesai"  },
+        { icon:"🗃️", val: s.byStatus?.["ARSIP"]       || 0,          label:"Arsip"    },
       ];
     });
 
@@ -753,11 +763,17 @@ createApp({
           sort   : "tanggal",
           order  : "desc",
         };
+        // Sort by tanggalSurat di client-side setelah data diterima
         if (activeFilter.value !== "all") params.filter = activeFilter.value;
         if (search.value.trim())          params.search = search.value.trim();
 
         const data     = await apiFetch(params);
-        docs.value      = data.docs;
+        // Sort by tanggalSurat desc (jika ada), fallback ke tanggal sync
+        docs.value = data.docs.sort((a, b) => {
+          const da = a.tanggalSurat || a.tanggal || "";
+          const db = b.tanggalSurat || b.tanggal || "";
+          return db.localeCompare(da);
+        });
         total.value     = data.total;
         totalPages.value= data.totalPages;
       } catch (e) {
@@ -797,13 +813,13 @@ createApp({
       activeTab.value   = doc ? "view" : "edit";
       if (doc) {
         form.value = {
-          tanggal      : doc.tanggal ? doc.tanggal.split(" ")[0] : "",
-          kategori     : doc.kategori     || "PDF",
-          source       : doc.source       || "",
-          status       : doc.status       || "BARU",
-          namaFile     : doc.namaFile     || "",
-          perihal      : doc.perihal      || "",
-          tanggalSurat : doc.tanggalSurat || "",
+          tanggal      : doc.tanggal      ? doc.tanggal.split(" ")[0] : "",
+          kategori     : String(doc.kategori     || "PDF"),
+          source       : String(doc.source       || ""),
+          status       : String(doc.status       || "BARU"),
+          namaFile     : String(doc.namaFile     || ""),
+          perihal      : String(doc.perihal      || ""),
+          tanggalSurat : String(doc.tanggalSurat || ""),
         };
       } else {
         form.value = {
