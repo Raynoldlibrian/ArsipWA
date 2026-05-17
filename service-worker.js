@@ -1,23 +1,22 @@
-const CACHE_NAME = 'Arsipku';
+const CACHE_NAME = 'arsipku-v1';
 const assets = [
   '/',
   '/index.html',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap',
-  'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  'https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap',
+  'https://unpkg.com/vue@3/dist/vue.global.prod.js',
 ];
 
-// Install — cache all assets
+// Install — cache semua assets
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
+      .then(cache => cache.addAll(assets))
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate — remove old caches
+// Activate — hapus cache lama
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -27,8 +26,16 @@ self.addEventListener('activate', e => {
 });
 
 // Fetch — cache first, network fallback
+// Khusus API Apps Script: selalu network (jangan di-cache)
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+
+  // Jangan cache request ke Apps Script API
+  if (e.request.url.includes('script.google.com')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
