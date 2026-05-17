@@ -858,6 +858,19 @@ createApp({
             perihal      : form.value.perihal,
             tanggalSurat : form.value.tanggalSurat,
           });
+          // Update lokal langsung agar card tidak perlu tunggu refetch
+          const idx = docs.value.findIndex(d => d.fileId === selectedDoc.value.fileId);
+          if (idx >= 0) {
+            docs.value[idx] = {
+              ...docs.value[idx],
+              namaFile     : form.value.namaFile,
+              kategori     : form.value.kategori,
+              source       : form.value.source,
+              status       : form.value.status,
+              perihal      : form.value.perihal,
+              tanggalSurat : form.value.tanggalSurat,
+            };
+          }
           showToast("✅ Perubahan disimpan");
         } else {
           showToast("ℹ️ Tambah dokumen manual belum tersedia di versi ini");
