@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ArsipKu</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & VARIABLES ─────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --bg:        #f7f6f2;
+  --surface:   #ffffff;
+  --surface2:  #f0ede6;
+  --border:    #e4e0d8;
+  --border2:   #d4cfc5;
+  --text:      #1c1a16;
+  --text2:     #6b6660;
+  --accent:    #d4450c;
+  --accent-bg: #fef2ed;
+  --green:     #1a7a4a;
+  --green-bg:  #eaf4f0;
+  --blue:      #1a5cb5;
+  --blue-bg:   #eef3fc;
+  --purple:    #6b3eb5;
+  --purple-bg: #f3eefb;
+  --orange:    #c47a0a;
+  --orange-bg: #fdf6e3;
+  --warn:      #b07010;
+  --warn-bg:   #fdf5e0;
+  --danger:    #c02030;
+  --danger-bg: #fdeced;
+  --sans:      'Sora', sans-serif;
+  --mono:      'JetBrains Mono', monospace;
+  --r-sm:      10px;
+  --r-md:      14px;
+  --r-lg:      20px;
+  --r-xl:      24px;
+  --sh:        0 2px 8px rgba(0,0,0,0.06);
+  --sh-lg:     0 8px 32px rgba(0,0,0,0.10);
+}
+
+html, body { height:100%; background:var(--bg); color:var(--text); font-family:var(--sans); }
+
+#app { max-width:430px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; position:relative; }
+
+/* ── TOPBAR ────────────────────────────────────────── */
+.topbar {
+  position:sticky; top:0; z-index:60;
+  background:rgba(247,246,242,0.92);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:48px 18px 12px;
+}
+
+.topbar-row1 { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+
+.brand { display:flex; align-items:center; gap:8px; }
+.brand-mark {
+  width:34px; height:34px; border-radius:10px;
+  background:var(--accent); display:flex; align-items:center; justify-content:center;
+  font-size:18px; box-shadow:0 2px 8px rgba(212,69,12,0.3);
+}
+.brand-name { font-size:18px; font-weight:700; letter-spacing:-0.03em; }
+.brand-name span { color:var(--accent); }
+
+.topbar-actions { display:flex; gap:6px; }
+
+.icon-btn {
+  width:36px; height:36px; border-radius:var(--r-sm);
+  background:var(--surface); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; cursor:pointer; transition:all .15s;
+}
+.icon-btn:active { transform:scale(.92); background:var(--surface2); }
+.icon-btn.spin svg { animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Search */
+.search-wrap { position:relative; margin-bottom:10px; }
+.search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text2); font-size:14px; pointer-events:none; }
+.search-input {
+  width:100%; padding:10px 14px 10px 36px;
+  border-radius:var(--r-sm); border:1.5px solid var(--border);
+  background:var(--surface); font-family:var(--sans); font-size:13px;
+  color:var(--text); outline:none; transition:border-color .2s;
+}
+.search-input:focus { border-color:var(--accent); }
+.search-input::placeholder { color:var(--text2); }
+
+/* Filter chips */
+.chips { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+.chips::-webkit-scrollbar { display:none; }
+.chip {
+  flex-shrink:0; padding:5px 12px; border-radius:20px;
+  font-size:11px; font-weight:600; cursor:pointer;
+  border:1.5px solid var(--border); background:var(--surface);
+  color:var(--text2); transition:all .15s; white-space:nowrap;
+}
+.chip.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.chip:active { transform:scale(.95); }
+
+/* ── STATS STRIP ───────────────────────────────────── */
+.stats-strip {
+  display:flex; gap:8px; padding:12px 18px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.stats-strip::-webkit-scrollbar { display:none; }
+
+.stat-card {
+  flex-shrink:0; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r-md);
+  padding:10px 14px; display:flex; align-items:center; gap:10px;
+  box-shadow:var(--sh);
+}
+.stat-icon { font-size:20px; }
+.stat-val { font-family:var(--mono); font-size:16px; font-weight:600; line-height:1; }
+.stat-lbl { font-size:10px; color:var(--text2); margin-top:2px; }
+
+/* ── ERROR BANNER ──────────────────────────────────── */
+.error-banner {
+  margin:0 18px 8px;
+  background:var(--danger-bg); border:1.5px solid #f5b8be;
+  border-radius:var(--r-sm); padding:10px 14px;
+  font-size:12px; color:var(--danger);
+  display:flex; align-items:center; gap:8px;
+}
+
+/* ── CARD LIST ─────────────────────────────────────── */
+.section-label {
+  padding:4px 18px 8px;
+  font-size:10px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--text2);
+}
+
+.card-list { padding:0 18px 100px; display:flex; flex-direction:column; gap:10px; }
+
+.doc-card {
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:14px; cursor:pointer;
+  transition:all .18s; box-shadow:var(--sh);
+}
+.doc-card:active { transform:scale(.98); box-shadow:none; }
+.doc-card:hover { border-color:var(--border2); }
+
+.card-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+
+.file-thumb {
+  width:44px; height:52px; border-radius:10px; flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; font-size:22px; position:relative;
+  border:1.5px solid var(--border);
+}
+.file-thumb-ext {
+  position:absolute; bottom:4px;
+  font-family:var(--mono); font-size:8px; font-weight:600;
+  text-transform:uppercase; letter-spacing:.02em;
+}
+.thumb-pdf    { background:var(--accent-bg);  } .thumb-pdf .file-thumb-ext    { color:var(--accent);  }
+.thumb-word   { background:var(--blue-bg);    } .thumb-word .file-thumb-ext   { color:var(--blue);    }
+.thumb-excel  { background:var(--green-bg);   } .thumb-excel .file-thumb-ext  { color:var(--green);   }
+.thumb-ppt    { background:var(--orange-bg);  } .thumb-ppt .file-thumb-ext    { color:var(--orange);  }
+.thumb-zip    { background:var(--purple-bg);  } .thumb-zip .file-thumb-ext    { color:var(--purple);  }
+.thumb-other  { background:var(--surface2);   } .thumb-other .file-thumb-ext  { color:var(--text2);   }
+
+.card-meta { flex:1; min-width:0; }
+.card-title {
+  font-size:13px; font-weight:600; line-height:1.4; margin-bottom:4px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.card-sub { font-size:11px; color:var(--text2); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.tags { display:flex; gap:5px; flex-wrap:wrap; }
+.tag { font-size:10px; font-weight:600; padding:2px 8px; border-radius:6px; }
+.tag-pdf   { background:var(--accent-bg);  color:var(--accent);  }
+.tag-word  { background:var(--blue-bg);    color:var(--blue);    }
+.tag-excel { background:var(--green-bg);   color:var(--green);   }
+.tag-ppt   { background:var(--orange-bg);  color:var(--orange);  }
+.tag-zip   { background:var(--purple-bg);  color:var(--purple);  }
+.tag-other { background:var(--surface2);   color:var(--text2);   }
+.tag-baru  { background:var(--green-bg);   color:var(--green);   }
+.tag-proses{ background:var(--orange-bg);  color:var(--orange);  }
+.tag-arsip { background:var(--surface2);   color:var(--text2);   }
+
+.card-bot {
+  display:flex; align-items:center; justify-content:space-between;
+  padding-top:10px; border-top:1px solid var(--border);
+}
+.card-date { font-family:var(--mono); font-size:10px; color:var(--text2); }
+.card-source { font-size:11px; color:var(--text2); display:flex; align-items:center; gap:4px; }
+
+.share-btn {
+  width:30px; height:30px; border-radius:8px; flex-shrink:0;
+  background:var(--surface2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; cursor:pointer; transition:all .15s;
+}
+.share-btn:active { background:var(--accent-bg); border-color:var(--accent); }
+
+/* ── LOADING SKELETON ──────────────────────────────── */
+.skeleton-card {
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:14px; box-shadow:var(--sh);
+}
+.skel {
+  background:linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+  background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ── EMPTY STATE ───────────────────────────────────── */
+.empty { text-align:center; padding:60px 20px; color:var(--text2); }
+.empty-icon { font-size:48px; margin-bottom:12px; }
+.empty p { font-size:14px; }
+
+/* ── FAB ───────────────────────────────────────────── */
+.fab {
+  position:fixed; bottom:76px; right:20px;
+  width:52px; height:52px; border-radius:16px;
+  background:var(--accent); color:#fff; font-size:24px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(212,69,12,.35);
+  cursor:pointer; border:none; transition:all .2s; z-index:40;
+}
+.fab:active { transform:scale(.92); }
+
+/* ── BOTTOM NAV ────────────────────────────────────── */
+.bottom-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:430px;
+  background:rgba(247,246,242,0.95); backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
+  display:flex; padding:8px 0 20px; z-index:50;
+}
+.nav-item {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  gap:3px; padding:4px 0; cursor:pointer;
+  color:var(--text2); font-size:10px; font-weight:600; transition:color .15s;
+}
+.nav-item.active { color:var(--accent); }
+.nav-icon { font-size:20px; }
+
+/* ── MODAL SHEET ───────────────────────────────────── */
+.overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.4);
+  backdrop-filter:blur(3px); z-index:100;
+  display:flex; align-items:flex-end;
+  opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.overlay.show { opacity:1; pointer-events:all; }
+
+.sheet {
+  background:var(--surface); border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%; max-height:92vh; overflow-y:auto;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.32,.72,0,1);
+  padding-bottom:32px;
+}
+.sheet::-webkit-scrollbar { display:none; }
+.overlay.show .sheet { transform:translateY(0); }
+
+.sheet-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:12px auto 0; }
+
+/* Modal header */
+.sheet-header {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 18px; border-bottom:1px solid var(--border);
+}
+.sheet-thumb {
+  width:44px; height:52px; border-radius:10px; flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; font-size:22px; position:relative;
+  border:1.5px solid var(--border);
+}
+.sheet-title-wrap { flex:1; min-width:0; }
+.sheet-filename { font-size:13px; font-weight:700; line-height:1.3; margin-bottom:3px; }
+.sheet-filemeta { font-family:var(--mono); font-size:10px; color:var(--text2); }
+.sheet-close {
+  width:30px; height:30px; border-radius:8px; flex-shrink:0;
+  background:var(--surface2); border:1px solid var(--border);
+  font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+
+/* Tabs */
+.sheet-tabs { display:flex; padding:10px 18px 0; gap:4px; border-bottom:1px solid var(--border); }
+.tab {
+  flex:1; padding:8px 0; text-align:center;
+  font-size:12px; font-weight:600; color:var(--text2);
+  cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s;
+}
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* Tab panels */
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* View panel */
+.view-panel { padding:14px 18px 0; }
+.view-link-row {
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r-sm); padding:11px 13px; margin-bottom:12px;
+}
+.view-link-name { flex:1; min-width:0; }
+.view-link-name div:first-child { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.view-link-name div:last-child { font-family:var(--mono); font-size:10px; color:var(--text2); margin-top:2px; }
+
+.open-btn {
+  flex-shrink:0; padding:8px 13px; border-radius:var(--r-sm);
+  background:var(--accent); color:#fff;
+  font-family:var(--sans); font-size:12px; font-weight:600;
+  border:none; cursor:pointer; text-decoration:none;
+  display:flex; align-items:center; gap:5px; transition:all .15s;
+  white-space:nowrap;
+}
+.open-btn:active { transform:scale(.95); }
+
+/* Preview box */
+.preview-box {
+  border:1.5px solid var(--border); border-radius:var(--r-md);
+  background:var(--surface2); min-height:160px;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center; padding:24px 20px; margin-bottom:12px;
+}
+.preview-icon { font-size:44px; margin-bottom:10px; }
+.preview-title { font-size:13px; font-weight:600; margin-bottom:4px; }
+.preview-sub { font-size:11px; color:var(--text2); line-height:1.6; }
+
+/* Meta list */
+.meta-list { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); overflow:hidden; }
+.meta-row { display:flex; align-items:flex-start; padding:9px 13px; border-bottom:1px solid var(--border); gap:10px; }
+.meta-row:last-child { border-bottom:none; }
+.meta-key { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); width:76px; flex-shrink:0; padding-top:1px; }
+.meta-val { font-size:12px; flex:1; line-height:1.4; }
+
+/* Edit panel / form */
+.edit-panel { padding:14px 18px 0; }
+.form-group { margin-bottom:12px; }
+.form-label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text2); margin-bottom:5px; }
+.form-input, .form-select, .form-textarea {
+  width:100%; padding:10px 12px; border-radius:var(--r-sm);
+  border:1.5px solid var(--border); background:var(--surface2);
+  font-family:var(--sans); font-size:13px; color:var(--text);
+  outline:none; transition:border-color .2s, background .2s; -webkit-appearance:none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent); background:var(--surface); }
+.form-textarea { resize:none; height:68px; line-height:1.5; }
+.form-row { display:flex; gap:10px; }
+.form-row .form-group { flex:1; }
+
+/* Buttons */
+.modal-actions { padding:14px 18px 0; display:flex; flex-direction:column; gap:8px; }
+.btn {
+  width:100%; padding:13px; border-radius:var(--r-md);
+  font-family:var(--sans); font-size:13px; font-weight:600;
+  cursor:pointer; border:none; transition:all .15s;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+}
+.btn:active { transform:scale(.98); }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-share   { background:var(--green-bg); color:var(--green); border:1.5px solid #b4dcc8; }
+.btn-danger  { background:var(--danger-bg); color:var(--danger); border:1.5px solid #f5b8be; }
+.btn-ghost   { background:var(--surface2); color:var(--text); border:1.5px solid var(--border); }
+
+/* ── TOAST ─────────────────────────────────────────── */
+.toast {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(16px);
+  background:var(--text); color:#fff; padding:9px 18px;
+  border-radius:20px; font-size:12px; font-weight:500;
+  opacity:0; transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  z-index:200; white-space:nowrap; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── PAGINATION ────────────────────────────────────── */
+.pagination { display:flex; align-items:center; justify-content:center; gap:10px; padding:16px 18px 0; }
+.page-btn {
+  padding:7px 14px; border-radius:var(--r-sm);
+  background:var(--surface); border:1.5px solid var(--border);
+  font-family:var(--sans); font-size:12px; font-weight:600;
+  cursor:pointer; color:var(--text); transition:all .15s;
+}
+.page-btn:disabled { opacity:.4; cursor:default; }
+.page-btn:not(:disabled):active { transform:scale(.95); }
+.page-info { font-family:var(--mono); font-size:11px; color:var(--text2); }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-row1">
+      <div class="brand">
+        <div class="brand-mark">📂</div>
+        <div class="brand-name">Arsip<span>Ku</span></div>
+      </div>
+      <div class="topbar-actions">
+        <div class="icon-btn" :class="{ spin: loading }" @click="fetchDocs" title="Refresh">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0019.49 15"/>
+          </svg>
+        </div>
+        <div class="icon-btn" @click="showStats = !showStats" title="Statistik">📊</div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" v-model="search" @input="onSearch" placeholder="Cari nama file, sumber...">
+    </div>
+    <div class="chips">
+      <div v-for="c in filters" :key="c.key"
+           class="chip" :class="{ active: activeFilter === c.key }"
+           @click="setFilter(c.key)">{{ c.label }}</div>
+    </div>
+  </div>
+
+  <!-- STATS STRIP -->
+  <transition name="slide-down">
+    <div class="stats-strip" v-if="showStats && stats">
+      <div class="stat-card" v-for="s in statCards" :key="s.label">
+        <div class="stat-icon">{{ s.icon }}</div>
+        <div>
+          <div class="stat-val">{{ s.val }}</div>
+          <div class="stat-lbl">{{ s.label }}</div>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- ERROR -->
+  <div class="error-banner" v-if="error">
+    ⚠️ {{ error }}
+  </div>
+
+  <!-- SECTION LABEL -->
+  <div class="section-label">
+    {{ sectionLabel }} <span style="color:var(--text2)">({{ total }})</span>
+  </div>
+
+  <!-- LOADING SKELETON -->
+  <div class="card-list" v-if="loading && docs.length === 0">
+    <div class="skeleton-card" v-for="i in 5" :key="i">
+      <div style="display:flex;gap:12px;margin-bottom:10px">
+        <div class="skel" style="width:44px;height:52px;border-radius:10px;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div class="skel" style="height:14px;width:80%;margin-bottom:8px"></div>
+          <div class="skel" style="height:12px;width:60%;margin-bottom:8px"></div>
+          <div class="skel" style="height:18px;width:40%"></div>
+        </div>
+      </div>
+      <div class="skel" style="height:1px;margin-bottom:10px"></div>
+      <div style="display:flex;justify-content:space-between">
+        <div class="skel" style="height:12px;width:100px"></div>
+        <div class="skel" style="height:12px;width:60px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD LIST -->
+  <div class="card-list" v-else-if="docs.length > 0">
+    <div class="doc-card" v-for="doc in docs" :key="doc.fileId" @click="openModal(doc)">
+      <div class="card-top">
+        <div class="file-thumb" :class="thumbClass(doc.kategori)">
+          {{ thumbIcon(doc.kategori) }}
+          <span class="file-thumb-ext">{{ extLabel(doc.kategori) }}</span>
+        </div>
+        <div class="card-meta">
+          <div class="card-title">{{ doc.namaFile }}</div>
+          <div class="card-sub">{{ doc.perihal || doc.source || '—' }}</div>
+          <div class="tags">
+            <span class="tag" :class="tagClass(doc.kategori)">{{ doc.kategori }}</span>
+            <span class="tag" :class="statusTagClass(doc.status)">{{ doc.status }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-bot">
+        <div>
+          <div class="card-date">{{ formatDate(doc.tanggal) }}</div>
+        </div>
+        <div class="share-btn" @click.stop="quickShare(doc)">🔗</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY -->
+  <div class="empty" v-else-if="!loading">
+    <div class="empty-icon">📭</div>
+    <p>Tidak ada dokumen ditemukan</p>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination" v-if="totalPages > 1">
+    <button class="page-btn" :disabled="page <= 1" @click="changePage(page - 1)">← Prev</button>
+    <span class="page-info">{{ page }} / {{ totalPages }}</span>
+    <button class="page-btn" :disabled="page >= totalPages" @click="changePage(page + 1)">Next →</button>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" @click="openModal(null)">＋</button>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active"><div class="nav-icon">📄</div>Dokumen</div>
+    <div class="nav-item" @click="fetchDocs"><div class="nav-icon">🔄</div>Sync</div>
+    <div class="nav-item" @click="showStats = !showStats"><div class="nav-icon">📊</div>Statistik</div>
+    <div class="nav-item"><div class="nav-icon">⚙️</div>Setelan</div>
+  </div>
+
+  <!-- MODAL OVERLAY -->
+  <div class="overlay" :class="{ show: modalOpen }" @click.self="closeModal">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+
+      <!-- Header -->
+      <div class="sheet-header">
+        <div class="sheet-thumb" :class="selectedDoc ? thumbClass(selectedDoc.kategori) : 'thumb-other'">
+          {{ selectedDoc ? thumbIcon(selectedDoc.kategori) : '📄' }}
+          <span class="file-thumb-ext">{{ selectedDoc ? extLabel(selectedDoc.kategori) : '' }}</span>
+        </div>
+        <div class="sheet-title-wrap">
+          <div class="sheet-filename">{{ selectedDoc ? selectedDoc.namaFile : 'Dokumen Baru' }}</div>
+          <div class="sheet-filemeta">{{ selectedDoc ? (selectedDoc.kategori + ' · ' + formatDate(selectedDoc.tanggal)) : 'Manual entry' }}</div>
+        </div>
+        <button class="sheet-close" @click="closeModal">✕</button>
+      </div>
+
+      <!-- Tabs (hanya untuk dokumen existing) -->
+      <div class="sheet-tabs" v-if="selectedDoc">
+        <div class="tab" :class="{ active: activeTab === 'view' }" @click="activeTab = 'view'">👁 Lihat</div>
+        <div class="tab" :class="{ active: activeTab === 'edit' }" @click="activeTab = 'edit'">✏️ Edit</div>
+      </div>
+
+      <!-- TAB: VIEW -->
+      <div class="tab-panel" :class="{ active: activeTab === 'view' && selectedDoc }">
+        <div class="view-panel">
+          <div class="view-link-row">
+            <div class="view-link-name">
+              <div>{{ selectedDoc ? selectedDoc.namaFile : '' }}</div>
+              <div>{{ selectedDoc ? selectedDoc.kategori : '' }}</div>
+            </div>
+            <a class="open-btn" :href="selectedDoc ? selectedDoc.linkDrive : '#'" target="_blank" rel="noopener">
+              🔗 Buka
+            </a>
+          </div>
+          <div class="preview-box">
+            <div>
+              <div class="preview-icon">{{ selectedDoc ? thumbIcon(selectedDoc.kategori) : '📄' }}</div>
+              <div class="preview-title">File {{ selectedDoc ? selectedDoc.kategori : '' }}</div>
+              <div class="preview-sub">Tap <strong>Buka</strong> untuk melihat<br>file di Google Drive</div>
+            </div>
+          </div>
+          <div class="meta-list" v-if="selectedDoc">
+            <div class="meta-row"><div class="meta-key">Perihal</div><div class="meta-val" :style="selectedDoc.perihal ? '' : 'color:var(--text2);font-style:italic'">{{ selectedDoc.perihal || 'Belum diisi' }}</div></div>
+            <div class="meta-row"><div class="meta-key">Tgl Surat</div><div class="meta-val" :style="selectedDoc.tanggalSurat ? '' : 'color:var(--text2);font-style:italic'">{{ selectedDoc.tanggalSurat ? formatDate(selectedDoc.tanggalSurat) : 'Belum diisi' }}</div></div>
+            <div class="meta-row"><div class="meta-key">Nama File</div><div class="meta-val">{{ selectedDoc.namaFile }}</div></div>
+            <div class="meta-row"><div class="meta-key">Kategori</div><div class="meta-val">{{ selectedDoc.kategori }}</div></div>
+            <div class="meta-row"><div class="meta-key">Sumber</div><div class="meta-val">{{ selectedDoc.source || '—' }}</div></div>
+            <div class="meta-row"><div class="meta-key">Tgl Masuk</div><div class="meta-val">{{ formatDate(selectedDoc.tanggal) }}</div></div>
+            <div class="meta-row"><div class="meta-key">Status</div><div class="meta-val">{{ selectedDoc.status }}</div></div>
+            <div class="meta-row"><div class="meta-key">OCR</div><div class="meta-val">{{ selectedDoc.ocrStatus }}</div></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-share" @click="quickShare(selectedDoc)">🔗 Copy Link Drive</button>
+        </div>
+      </div>
+
+      <!-- TAB: EDIT -->
+      <div class="tab-panel" :class="{ active: activeTab === 'edit' || !selectedDoc }">
+        <div class="edit-panel">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tanggal</label>
+              <input class="form-input" type="date" v-model="form.tanggal">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Kategori</label>
+              <select class="form-select" v-model="form.kategori">
+                <option value="PDF">📕 PDF</option>
+                <option value="Word">📝 Word</option>
+                <option value="Excel">📊 Excel</option>
+                <option value="PowerPoint">📊 PowerPoint</option>
+                <option value="ZIP/RAR">🗜️ ZIP/RAR</option>
+                <option value="Gambar">🖼️ Gambar</option>
+                <option value="Dokumen">📄 Dokumen</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Perihal / Hal Surat</label>
+            <textarea class="form-textarea" v-model="form.perihal" placeholder="Perihal atau hal surat... (akan diisi otomatis via OCR)"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tanggal Surat</label>
+              <input class="form-input" type="date" v-model="form.tanggalSurat">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-select" v-model="form.status">
+                <option value="BARU">BARU</option>
+                <option value="DIPROSES">DIPROSES</option>
+                <option value="SELESAI">SELESAI</option>
+                <option value="ARSIP">ARSIP</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sumber</label>
+            <input class="form-input" type="text" v-model="form.source" placeholder="WhatsApp, Email, dst...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama File</label>
+            <input class="form-input" type="text" v-model="form.namaFile" placeholder="Nama file...">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" @click="saveDoc" :disabled="saving">
+            {{ saving ? '⏳ Menyimpan...' : (selectedDoc ? '💾 Simpan Perubahan' : '➕ Tambah Dokumen') }}
+          </button>
+          <button class="btn btn-danger" v-if="selectedDoc" @click="deleteDoc" :disabled="saving">
+            🗑 Hapus Dokumen
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" :class="{ show: toastVisible }">{{ toastMsg }}</div>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+// ── KONFIGURASI ─────────────────────────────────────
+const API_URL = "https://script.google.com/macros/s/AKfycbwWN9FWwrvWcwe6UkbZ0ZDiefvtvDx9id5eZvKxQK8cdTrM2Zt1urcG8rXnpEJzvh1p_A/exec";
+
+// ── HELPERS ──────────────────────────────────────────
+const KAT_CONFIG = {
+  "PDF"        : { icon:"📕", thumb:"thumb-pdf",   tag:"tag-pdf",   ext:"PDF"  },
+  "Word"       : { icon:"📝", thumb:"thumb-word",  tag:"tag-word",  ext:"DOC"  },
+  "Excel"      : { icon:"📊", thumb:"thumb-excel", tag:"tag-excel", ext:"XLS"  },
+  "PowerPoint" : { icon:"📊", thumb:"thumb-ppt",   tag:"tag-ppt",   ext:"PPT"  },
+  "ZIP/RAR"    : { icon:"🗜️", thumb:"thumb-zip",   tag:"tag-zip",   ext:"ZIP"  },
+  "Gambar"     : { icon:"🖼️", thumb:"thumb-other", tag:"tag-other", ext:"IMG"  },
+  "Peta"       : { icon:"🗺️", thumb:"thumb-zip",   tag:"tag-zip",   ext:"KMZ"  },
+};
+const DEF_KAT = { icon:"📄", thumb:"thumb-other", tag:"tag-other", ext:"FILE" };
+
+function getKat(k) { return KAT_CONFIG[k] || DEF_KAT; }
+
+createApp({
+  setup() {
+    // ── STATE ──────────────────────────────────────
+    const docs        = ref([]);
+    const stats       = ref(null);
+    const loading     = ref(false);
+    const saving      = ref(false);
+    const error       = ref("");
+    const search      = ref("");
+    const activeFilter= ref("all");
+    const page        = ref(1);
+    const total       = ref(0);
+    const totalPages  = ref(1);
+    const showStats   = ref(false);
+    const modalOpen   = ref(false);
+    const selectedDoc = ref(null);
+    const activeTab   = ref("view");
+    const toastMsg    = ref("");
+    const toastVisible= ref(false);
+    let   searchTimer = null;
+    let   toastTimer  = null;
+
+    const form = ref({ tanggal:"", kategori:"PDF", source:"", status:"BARU", namaFile:"" });
+
+    // ── COMPUTED ────────────────────────────────────
+    const filters = [
+      { key:"all",        label:"Semua"      },
+      { key:"PDF",        label:"📕 PDF"     },
+      { key:"Word",       label:"📝 Word"    },
+      { key:"Excel",      label:"📊 Excel"   },
+      { key:"PowerPoint", label:"📊 PPT"     },
+      { key:"ZIP/RAR",    label:"🗜️ ZIP/RAR" },
+    ];
+
+    const sectionLabel = computed(() => {
+      if (activeFilter.value === "all") return "Dokumen Terbaru";
+      return "Filter: " + activeFilter.value;
+    });
+
+    const statCards = computed(() => {
+      if (!stats.value) return [];
+      const s = stats.value;
+      return [
+        { icon:"📄", val: s.total,                          label:"Total"   },
+        { icon:"📕", val: s.byKategori?.["PDF"]       || 0, label:"PDF"     },
+        { icon:"📝", val: s.byKategori?.["Word"]      || 0, label:"Word"    },
+        { icon:"📊", val: s.byKategori?.["Excel"]     || 0, label:"Excel"   },
+        { icon:"🆕", val: s.byStatus?.["BARU"]        || 0, label:"Baru"    },
+        { icon:"✅", val: s.byStatus?.["SELESAI"]     || 0, label:"Selesai" },
+      ];
+    });
+
+    // ── FILE TYPE HELPERS ────────────────────────────
+    function thumbClass(k)  { return getKat(k).thumb; }
+    function thumbIcon(k)   { return getKat(k).icon;  }
+    function extLabel(k)    { return getKat(k).ext;   }
+    function tagClass(k)    { return getKat(k).tag;   }
+    function statusTagClass(s) {
+      if (s === "BARU")     return "tag-baru";
+      if (s === "DIPROSES") return "tag-proses";
+      return "tag-arsip";
+    }
+
+    function formatDate(d) {
+      if (!d) return "—";
+      try {
+        const dt = new Date(d);
+        return dt.toLocaleDateString("id-ID", { day:"2-digit", month:"short", year:"numeric" });
+      } catch { return d; }
+    }
+
+    // ── API CALLS ─────────────────────────────────────
+    async function apiFetch(params) {
+      const url = new URL(API_URL);
+      Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+      const res  = await fetch(url.toString());
+      const json = await res.json();
+      if (json.status !== "ok") throw new Error(json.message || "API error");
+      return json.data;
+    }
+
+    async function apiPost(body) {
+      const res  = await fetch(API_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (json.status !== "ok") throw new Error(json.message || "API error");
+      return json.data;
+    }
+
+    async function fetchDocs() {
+      loading.value = true;
+      error.value   = "";
+      try {
+        const params = {
+          action : "list",
+          page   : page.value,
+          limit  : 20,
+          sort   : "tanggal",
+          order  : "desc",
+        };
+        if (activeFilter.value !== "all") params.filter = activeFilter.value;
+        if (search.value.trim())          params.search = search.value.trim();
+
+        const data     = await apiFetch(params);
+        docs.value      = data.docs;
+        total.value     = data.total;
+        totalPages.value= data.totalPages;
+      } catch (e) {
+        error.value = "Gagal memuat data: " + e.message;
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    async function fetchStats() {
+      try {
+        stats.value = await apiFetch({ action:"stats" });
+      } catch {}
+    }
+
+    // ── FILTER & SEARCH ──────────────────────────────
+    function setFilter(key) {
+      activeFilter.value = key;
+      page.value = 1;
+      fetchDocs();
+    }
+
+    function onSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => { page.value = 1; fetchDocs(); }, 400);
+    }
+
+    function changePage(p) {
+      page.value = p;
+      fetchDocs();
+      window.scrollTo({ top:0, behavior:"smooth" });
+    }
+
+    // ── MODAL ─────────────────────────────────────────
+    function openModal(doc) {
+      selectedDoc.value = doc;
+      activeTab.value   = doc ? "view" : "edit";
+      if (doc) {
+        form.value = {
+          tanggal      : doc.tanggal ? doc.tanggal.split(" ")[0] : "",
+          kategori     : doc.kategori     || "PDF",
+          source       : doc.source       || "",
+          status       : doc.status       || "BARU",
+          namaFile     : doc.namaFile     || "",
+          perihal      : doc.perihal      || "",
+          tanggalSurat : doc.tanggalSurat || "",
+        };
+      } else {
+        form.value = {
+          tanggal      : new Date().toISOString().split("T")[0],
+          kategori     : "PDF",
+          source       : "WhatsApp",
+          status       : "BARU",
+          namaFile     : "",
+          perihal      : "",
+          tanggalSurat : "",
+        };
+      }
+      modalOpen.value = true;
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modalOpen.value = false;
+      document.body.style.overflow = "";
+    }
+
+    // ── CRUD ──────────────────────────────────────────
+    async function saveDoc() {
+      if (!form.value.namaFile.trim()) { showToast("⚠️ Nama file wajib diisi!"); return; }
+      saving.value = true;
+      try {
+        if (selectedDoc.value) {
+          // UPDATE
+          await apiPost({
+            action       : "update",
+            fileId       : selectedDoc.value.fileId,
+            namaFile     : form.value.namaFile,
+            kategori     : form.value.kategori,
+            source       : form.value.source,
+            status       : form.value.status,
+            perihal      : form.value.perihal,
+            tanggalSurat : form.value.tanggalSurat,
+          });
+          showToast("✅ Perubahan disimpan");
+        } else {
+          showToast("ℹ️ Tambah dokumen manual belum tersedia di versi ini");
+        }
+        closeModal();
+        fetchDocs();
+      } catch (e) {
+        showToast("❌ Gagal: " + e.message);
+      } finally {
+        saving.value = false;
+      }
+    }
+
+    async function deleteDoc() {
+      if (!confirm("Hapus dokumen ini dari Sheet?")) return;
+      saving.value = true;
+      try {
+        await apiPost({ action:"delete", fileId: selectedDoc.value.fileId });
+        showToast("🗑 Dokumen dihapus");
+        closeModal();
+        fetchDocs();
+      } catch (e) {
+        showToast("❌ Gagal: " + e.message);
+      } finally {
+        saving.value = false;
+      }
+    }
+
+    function quickShare(doc) {
+      if (!doc) return;
+      navigator.clipboard.writeText(doc.linkDrive).catch(() => {});
+      showToast("🔗 Link disalin!");
+    }
+
+    // ── TOAST ──────────────────────────────────────────
+    function showToast(msg) {
+      toastMsg.value     = msg;
+      toastVisible.value = true;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toastVisible.value = false; }, 2400);
+    }
+
+    // ── INIT ───────────────────────────────────────────
+    onMounted(() => {
+      fetchDocs();
+      fetchStats();
+    });
+
+    return {
+      docs, stats, loading, saving, error, search,
+      activeFilter, page, total, totalPages, showStats,
+      modalOpen, selectedDoc, activeTab, form,
+      toastMsg, toastVisible, filters, sectionLabel, statCards,
+      thumbClass, thumbIcon, extLabel, tagClass, statusTagClass,
+      formatDate, fetchDocs, setFilter, onSearch, changePage,
+      openModal, closeModal, saveDoc, deleteDoc, quickShare,
+    };
+  }
+}).mount("#app");
+</script>
+</body>
+</html>
