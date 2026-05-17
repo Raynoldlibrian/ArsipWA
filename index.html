@@ -735,17 +735,6 @@ createApp({
       return json.data;
     }
 
-    async function apiPost(body) {
-      const res  = await fetch(API_URL, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      if (json.status !== "ok") throw new Error(json.message || "API error");
-      return json.data;
-    }
-
     async function fetchDocs() {
       loading.value = true;
       error.value   = "";
@@ -835,8 +824,8 @@ createApp({
       saving.value = true;
       try {
         if (selectedDoc.value) {
-          // UPDATE
-          await apiPost({
+          // UPDATE via GET (CORS-safe untuk Vercel)
+          await apiFetch({
             action       : "update",
             fileId       : selectedDoc.value.fileId,
             namaFile     : form.value.namaFile,
@@ -863,7 +852,7 @@ createApp({
       if (!confirm("Hapus dokumen ini dari Sheet?")) return;
       saving.value = true;
       try {
-        await apiPost({ action:"delete", fileId: selectedDoc.value.fileId });
+        await apiFetch({ action:"delete", fileId: selectedDoc.value.fileId });
         showToast("🗑 Dokumen dihapus");
         closeModal();
         fetchDocs();
