@@ -1,8 +1,8 @@
 {
-  "id": "https://laker2026.vercel.app/",
-  "name": "Laporan Kerja 2026",
-  "short_name": "laker 2",
-  "description": "buat laporan kerja simple dan cepat",
+  "id": "https://arsipwa.vercel.app/",
+  "name": "Arsip Dokumen WA",
+  "short_name": "ArsipKu",
+  "description": "Manajemen Arsip Dokumen Whatsapp",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
