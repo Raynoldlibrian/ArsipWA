@@ -2,12 +2,12 @@
   "id": "https://arsipwa.vercel.app/",
   "name": "Arsip Dokumen WA",
   "short_name": "ArsipKu",
-  "description": "Manajemen Arsip Dokumen Whatsapp",
+  "description": "Manajemen Arsip Dokumen WhatsApp",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f0f2f8",
-  "theme_color": "#1a56db",
+  "background_color": "#f7f6f2",
+  "theme_color": "#d4450c",
   "orientation": "portrait-primary",
   "lang": "id",
   "categories": ["utilities", "productivity"],
@@ -15,12 +15,14 @@
     {
       "src": "icon.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
