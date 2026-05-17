@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Laker-v2';
+const CACHE_NAME = 'Arsipku';
 const assets = [
   '/',
   '/index.html',
