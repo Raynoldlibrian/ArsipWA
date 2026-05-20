@@ -142,7 +142,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   text-transform:uppercase; color:var(--text2);
 }
 
-.card-list { padding:0 18px 100px; display:flex; flex-direction:column; gap:10px; }
+.card-list { padding:0 18px 8px; display:flex; flex-direction:column; gap:10px; }
 
 .doc-card {
   background:var(--surface); border:1.5px solid var(--border);
@@ -399,7 +399,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* ── PAGINATION ────────────────────────────────────── */
-.pagination { display:flex; align-items:center; justify-content:center; gap:10px; padding:16px 18px 0; }
+.pagination { display:flex; align-items:center; justify-content:center; gap:10px; padding:16px 18px 110px; }
 .page-btn {
   padding:7px 14px; border-radius:var(--r-sm);
   background:var(--surface); border:1.5px solid var(--border);
@@ -516,7 +516,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   </div>
 
   <!-- PAGINATION -->
-  <div class="pagination" v-if="totalPages >= 1 && total > 0">
+  <div class="pagination" v-if="totalPages > 1">
     <button class="page-btn" :disabled="page <= 1" @click="changePage(page - 1)">← Prev</button>
     <span class="page-info">{{ page }} / {{ totalPages }} <span style="color:var(--text2)">({{ total }})</span></span>
     <button class="page-btn" :disabled="page >= totalPages" @click="changePage(page + 1)">Next →</button>
