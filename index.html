@@ -196,6 +196,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   padding-top:10px; border-top:1px solid var(--border);
 }
 .card-date { font-family:var(--mono); font-size:10px; color:var(--text2); }
+.card-filename { font-size:11px; color:var(--text2); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:var(--mono); }
 .card-source { font-size:11px; color:var(--text2); display:flex; align-items:center; gap:4px; }
 
 .share-btn {
@@ -371,6 +372,22 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 .btn-danger  { background:var(--danger-bg); color:var(--danger); border:1.5px solid #f5b8be; }
 .btn-ghost   { background:var(--surface2); color:var(--text); border:1.5px solid var(--border); }
 
+/* ── UPLOAD AREA ──────────────────────────────────── */
+.upload-area {
+  border: 2px dashed var(--border2);
+  border-radius: var(--r-md);
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--surface2);
+  margin-bottom: 4px;
+}
+.upload-area:hover, .upload-area:active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
 /* ── TOAST ─────────────────────────────────────────── */
 .toast {
   position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(16px);
@@ -471,8 +488,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
     <div class="doc-card" v-for="doc in docs" :key="doc.fileId" @click="openModal(doc)">
       <div class="card-top">
         <div class="card-meta" style="margin-left:0">
-          <div class="card-title">{{ doc.namaFile }}</div>
-          <div class="card-sub" v-if="doc.perihal">{{ doc.perihal }}</div>
+          <div class="card-title">{{ doc.perihal || doc.namaFile }}</div>
+          <div class="card-filename" v-if="doc.perihal">{{ doc.namaFile }}</div>
           <div class="card-source" v-if="doc.source" style="margin-bottom:6px">{{ doc.source }}</div>
           <div class="tags">
             <span class="tag" :class="tagClass(doc.kategori)">{{ doc.kategori }}</span>
@@ -499,9 +516,9 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   </div>
 
   <!-- PAGINATION -->
-  <div class="pagination" v-if="totalPages > 1">
+  <div class="pagination" v-if="totalPages >= 1 && total > 0">
     <button class="page-btn" :disabled="page <= 1" @click="changePage(page - 1)">← Prev</button>
-    <span class="page-info">{{ page }} / {{ totalPages }}</span>
+    <span class="page-info">{{ page }} / {{ totalPages }} <span style="color:var(--text2)">({{ total }})</span></span>
     <button class="page-btn" :disabled="page >= totalPages" @click="changePage(page + 1)">Next →</button>
   </div>
 
@@ -577,7 +594,26 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 
       <!-- TAB: EDIT -->
       <div class="tab-panel" :class="{ active: activeTab === 'edit' || !selectedDoc }">
+        <!-- Upload area (hanya untuk dokumen baru) -->
+        <div class="edit-panel" v-if="!selectedDoc">
+          <div class="upload-area" @click="triggerUpload" @dragover.prevent @drop.prevent="onFileDrop">
+            <input type="file" ref="fileInput" style="display:none" @change="onFileSelect"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar">
+            <div v-if="!uploadFile">
+              <div style="font-size:36px;margin-bottom:8px">📂</div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px">Tap untuk pilih file</div>
+              <div style="font-size:11px;color:var(--text2)">PDF, Word, Excel, PPT, ZIP/RAR</div>
+            </div>
+            <div v-else style="text-align:left">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">File dipilih:</div>
+              <div style="font-size:13px;font-weight:600;word-break:break-all">{{ uploadFile.name }}</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:4px">{{ formatFileSize(uploadFile.size) }}</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--text2);margin:8px 0 4px">atau isi manual tanpa upload</div>
+        </div>
         <div class="edit-panel">
+          <div class="form-row" v-if="!selectedDoc" style="display:none"></div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Tanggal Sync</label>
@@ -684,6 +720,31 @@ createApp({
     let   toastTimer  = null;
 
     const form = ref({ tanggal:"", kategori:"PDF", source:"", status:"BARU", namaFile:"" });
+    const uploadFile  = ref(null);
+    const fileInput   = ref(null);
+
+    function triggerUpload() { fileInput.value?.click(); }
+    function onFileSelect(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      uploadFile.value = f;
+      if (!form.value.namaFile) form.value.namaFile = f.name;
+      // Auto-detect kategori
+      const ext = f.name.split(".").pop().toLowerCase();
+      const extMap = { pdf:"PDF", doc:"Word", docx:"Word", xls:"Excel", xlsx:"Excel", ppt:"PowerPoint", pptx:"PowerPoint", zip:"ZIP/RAR", rar:"ZIP/RAR" };
+      if (extMap[ext]) form.value.kategori = extMap[ext];
+    }
+    function onFileDrop(e) {
+      const f = e.dataTransfer.files[0];
+      if (!f) return;
+      uploadFile.value = f;
+      if (!form.value.namaFile) form.value.namaFile = f.name;
+    }
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1048576) return (bytes/1024).toFixed(1) + " KB";
+      return (bytes/1048576).toFixed(1) + " MB";
+    }
 
     // ── COMPUTED ────────────────────────────────────
     const filters = [
@@ -760,11 +821,10 @@ createApp({
         const params = {
           action : "list",
           page   : page.value,
-          limit  : 20,
+          limit  : 15,
           sort   : "tanggal",
           order  : "desc",
         };
-        // Sort by tanggalSurat di client-side setelah data diterima
         if (activeFilter.value !== "all") params.filter = activeFilter.value;
         if (search.value.trim())          params.search = search.value.trim();
 
@@ -840,11 +900,16 @@ createApp({
     function closeModal() {
       modalOpen.value = false;
       document.body.style.overflow = "";
+      uploadFile.value = null;
+      if (fileInput.value) fileInput.value.value = "";
     }
 
     // ── CRUD ──────────────────────────────────────────
     async function saveDoc() {
-      if (!form.value.namaFile.trim()) { showToast("⚠️ Nama file wajib diisi!"); return; }
+      if (!form.value.namaFile.trim() && !uploadFile.value) { showToast("⚠️ Nama file atau pilih file dulu!"); return; }
+      if (!form.value.namaFile.trim() && uploadFile.value) {
+        form.value.namaFile = uploadFile.value.name;
+      }
       saving.value = true;
       try {
         if (selectedDoc.value) {
