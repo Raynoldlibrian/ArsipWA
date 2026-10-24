@@ -50,16 +50,15 @@
 }
 
 html, body { height:100%; background:var(--bg); color:var(--text); font-family:var(--sans); }
-
-#app { max-width:430px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; position:relative; }
+#app { max-width:440px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; position:relative; }
 
 /* ── TOPBAR ────────────────────────────────────────── */
 .topbar {
   position:sticky; top:0; z-index:60;
-  background:rgba(247,246,242,0.92);
+  background:rgba(247,246,242,0.96);
   backdrop-filter:blur(14px);
   border-bottom:1px solid var(--border);
-  padding:48px 18px 12px;
+  padding:36px 16px 12px;
 }
 
 .topbar-row1 { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -73,45 +72,73 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 .brand-name { font-size:18px; font-weight:700; letter-spacing:-0.03em; }
 .brand-name span { color:var(--accent); }
 
-.topbar-actions { display:flex; gap:6px; }
+.topbar-actions { display:flex; gap:6px; align-items:center; }
+.sync-badge {
+  font-size:10px; font-weight:600; padding:4px 8px; border-radius:20px;
+  background:var(--surface); border:1px solid var(--border); color:var(--text2);
+  display:flex; align-items:center; gap:4px; font-family:var(--mono);
+}
+.sync-badge.syncing { color:var(--accent); border-color:var(--accent); background:var(--accent-bg); }
 
 .icon-btn {
-  width:36px; height:36px; border-radius:var(--r-sm);
+  width:34px; height:34px; border-radius:var(--r-sm);
   background:var(--surface); border:1px solid var(--border);
   display:flex; align-items:center; justify-content:center;
-  font-size:16px; cursor:pointer; transition:all .15s;
+  font-size:15px; cursor:pointer; transition:all .15s;
 }
 .icon-btn:active { transform:scale(.92); background:var(--surface2); }
 .icon-btn.spin svg { animation:spin 1s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-/* Search */
-.search-wrap { position:relative; margin-bottom:10px; }
+/* Search Box */
+.search-wrap { position:relative; margin-bottom:8px; }
 .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text2); font-size:14px; pointer-events:none; }
+.search-clear {
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  width:22px; height:22px; border-radius:50%; background:var(--surface2);
+  border:none; color:var(--text2); font-size:12px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
 .search-input {
-  width:100%; padding:10px 14px 10px 36px;
+  width:100%; padding:10px 36px 10px 36px;
   border-radius:var(--r-sm); border:1.5px solid var(--border);
   background:var(--surface); font-family:var(--sans); font-size:13px;
   color:var(--text); outline:none; transition:border-color .2s;
 }
 .search-input:focus { border-color:var(--accent); }
-.search-input::placeholder { color:var(--text2); }
+.search-input::placeholder { color:var(--text2); font-size:12px; }
 
-/* Filter chips */
-.chips { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
-.chips::-webkit-scrollbar { display:none; }
+/* Filter Chips Rows */
+.filter-scroll {
+  display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; scrollbar-width:none;
+}
+.filter-scroll::-webkit-scrollbar { display:none; }
+
 .chip {
-  flex-shrink:0; padding:5px 12px; border-radius:20px;
+  flex-shrink:0; padding:4px 10px; border-radius:18px;
   font-size:11px; font-weight:600; cursor:pointer;
-  border:1.5px solid var(--border); background:var(--surface);
+  border:1px solid var(--border); background:var(--surface);
   color:var(--text2); transition:all .15s; white-space:nowrap;
+  display:flex; align-items:center; gap:4px;
 }
 .chip.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 .chip:active { transform:scale(.95); }
+.chip-count { font-size:9px; opacity:0.8; font-family:var(--mono); }
+
+/* Format Pills Row */
+.sub-chips { display:flex; gap:5px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+.sub-chips::-webkit-scrollbar { display:none; }
+.sub-chip {
+  flex-shrink:0; padding:2px 8px; border-radius:12px;
+  font-size:10px; font-weight:600; cursor:pointer;
+  border:1px solid transparent; background:transparent;
+  color:var(--text2); transition:all .12s;
+}
+.sub-chip.active { background:var(--surface); border-color:var(--border2); color:var(--text); font-weight:700; }
 
 /* ── STATS STRIP ───────────────────────────────────── */
 .stats-strip {
-  display:flex; gap:8px; padding:12px 18px;
+  display:flex; gap:8px; padding:12px 16px;
   overflow-x:auto; scrollbar-width:none;
 }
 .stats-strip::-webkit-scrollbar { display:none; }
@@ -128,21 +155,28 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 
 /* ── ERROR BANNER ──────────────────────────────────── */
 .error-banner {
-  margin:0 18px 8px;
+  margin:8px 16px;
   background:var(--danger-bg); border:1.5px solid #f5b8be;
   border-radius:var(--r-sm); padding:10px 14px;
   font-size:12px; color:var(--danger);
   display:flex; align-items:center; gap:8px;
 }
 
-/* ── CARD LIST ─────────────────────────────────────── */
+/* ── SECTION HEADER ────────────────────────────────── */
+.section-header {
+  padding:10px 16px 6px;
+  display:flex; align-items:center; justify-content:space-between;
+}
 .section-label {
-  padding:4px 18px 8px;
-  font-size:10px; font-weight:700; letter-spacing:.1em;
+  font-size:10px; font-weight:700; letter-spacing:.08em;
   text-transform:uppercase; color:var(--text2);
 }
+.section-count {
+  font-family:var(--mono); font-size:11px; color:var(--text2);
+}
 
-.card-list { padding:0 18px 8px; display:flex; flex-direction:column; gap:10px; }
+/* ── CARD LIST ─────────────────────────────────────── */
+.card-list { padding:0 16px 8px; display:flex; flex-direction:column; gap:10px; }
 
 .doc-card {
   background:var(--surface); border:1.5px solid var(--border);
@@ -155,14 +189,14 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 .card-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
 
 .file-thumb {
-  width:44px; height:52px; border-radius:10px; flex-shrink:0;
+  width:42px; height:50px; border-radius:10px; flex-shrink:0;
   display:flex; flex-direction:column; align-items:center;
-  justify-content:center; font-size:22px; position:relative;
+  justify-content:center; font-size:20px; position:relative;
   border:1.5px solid var(--border);
 }
 .file-thumb-ext {
-  position:absolute; bottom:4px;
-  font-family:var(--mono); font-size:8px; font-weight:600;
+  position:absolute; bottom:3px;
+  font-family:var(--mono); font-size:8px; font-weight:700;
   text-transform:uppercase; letter-spacing:.02em;
 }
 .thumb-pdf    { background:var(--accent-bg);  } .thumb-pdf .file-thumb-ext    { color:var(--accent);  }
@@ -177,37 +211,60 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   font-size:13px; font-weight:600; line-height:1.4; margin-bottom:4px;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
-.card-sub { font-size:11px; color:var(--text2); margin-bottom:6px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.card-filename {
+  font-size:11px; color:var(--text2); margin-bottom:6px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:var(--mono);
+}
+.card-source { font-size:11px; color:var(--text2); display:flex; align-items:center; gap:4px; margin-bottom:6px; }
 
-.tags { display:flex; gap:5px; flex-wrap:wrap; }
-.tag { font-size:10px; font-weight:600; padding:2px 8px; border-radius:6px; }
-.tag-pdf   { background:var(--accent-bg);  color:var(--accent);  }
-.tag-word  { background:var(--blue-bg);    color:var(--blue);    }
-.tag-excel { background:var(--green-bg);   color:var(--green);   }
-.tag-ppt   { background:var(--orange-bg);  color:var(--orange);  }
-.tag-zip   { background:var(--purple-bg);  color:var(--purple);  }
-.tag-other { background:var(--surface2);   color:var(--text2);   }
-.tag-baru  { background:var(--green-bg);   color:var(--green);   }
-.tag-proses{ background:var(--orange-bg);  color:var(--orange);  }
-.tag-arsip { background:var(--surface2);   color:var(--text2);   }
+/* Tag Badges */
+.tags { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+.tag {
+  font-size:10px; font-weight:600; padding:2px 7px; border-radius:6px;
+  display:inline-flex; align-items:center; gap:3px;
+}
+/* Kategori/Format Tags */
+.tag-pdf   { background:var(--accent-bg); color:var(--accent); }
+.tag-word  { background:var(--blue-bg);   color:var(--blue);   }
+.tag-excel { background:var(--green-bg);  color:var(--green);  }
+.tag-ppt   { background:var(--orange-bg); color:var(--orange); }
+.tag-zip   { background:var(--purple-bg); color:var(--purple); }
+.tag-other { background:var(--surface2);  color:var(--text2);  }
+
+/* Status Tags */
+.tag-baru   { background:var(--green-bg);  color:var(--green);  }
+.tag-proses { background:var(--orange-bg); color:var(--orange); }
+.tag-arsip  { background:var(--surface2);  color:var(--text2);  }
+
+/* Jenis Dokumen / Regulasi Tags */
+.tag-doc-uu         { background:#fdf2e9; color:#9c3803; border:1px solid #f6cca6; }
+.tag-doc-pp         { background:#fef5e7; color:#873600; border:1px solid #f9e1b7; }
+.tag-doc-perpres    { background:#fbeee6; color:#78281f; border:1px solid #f2c9b6; }
+.tag-doc-permenpan  { background:#eaf2f8; color:#1b4f72; border:1px solid #aed6f1; }
+.tag-doc-permendagri{ background:#e8f8f5; color:#0e6251; border:1px solid #a3e4d7; }
+.tag-doc-permenhub  { background:#ebf5fb; color:#21618c; border:1px solid #aed6f1; }
+.tag-doc-perbup     { background:#f5eef8; color:#512e5f; border:1px solid #d7bde2; }
+.tag-doc-se         { background:#fef9e7; color:#7d6608; border:1px solid #f9e79f; }
+.tag-doc-sk         { background:#e8eaf6; color:#1a237e; border:1px solid #c5cae9; }
+.tag-doc-undangan   { background:#e0f2f1; color:#004d40; border:1px solid #b2dfdb; }
+.tag-doc-laporan    { background:#fce4ec; color:#880e4f; border:1px solid #f8bbd0; }
+.tag-doc-notadinas  { background:#f3e5f5; color:#4a148c; border:1px solid #e1bee7; }
+.tag-doc-lainnya    { background:var(--surface2); color:var(--text2); border:1px solid var(--border); }
 
 .card-bot {
   display:flex; align-items:center; justify-content:space-between;
   padding-top:10px; border-top:1px solid var(--border);
 }
 .card-date { font-family:var(--mono); font-size:10px; color:var(--text2); }
-.card-filename { font-size:11px; color:var(--text2); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:var(--mono); }
-.card-source { font-size:11px; color:var(--text2); display:flex; align-items:center; gap:4px; }
-
 .share-btn {
-  width:30px; height:30px; border-radius:8px; flex-shrink:0;
+  width:28px; height:28px; border-radius:8px; flex-shrink:0;
   background:var(--surface2); border:1px solid var(--border);
   display:flex; align-items:center; justify-content:center;
-  font-size:13px; cursor:pointer; transition:all .15s;
+  font-size:12px; cursor:pointer; transition:all .15s;
 }
 .share-btn:active { background:var(--accent-bg); border-color:var(--accent); }
 
-/* ── LOADING SKELETON ──────────────────────────────── */
+/* ── SKELETON ──────────────────────────────────────── */
 .skeleton-card {
   background:var(--surface); border:1.5px solid var(--border);
   border-radius:var(--r-lg); padding:14px; box-shadow:var(--sh);
@@ -219,17 +276,22 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
 /* ── EMPTY STATE ───────────────────────────────────── */
-.empty { text-align:center; padding:60px 20px; color:var(--text2); }
-.empty-icon { font-size:48px; margin-bottom:12px; }
-.empty p { font-size:14px; }
+.empty { text-align:center; padding:50px 20px; color:var(--text2); }
+.empty-icon { font-size:44px; margin-bottom:10px; }
+.empty p { font-size:13px; line-height:1.5; }
+.empty-btn {
+  margin-top:14px; padding:7px 16px; border-radius:18px;
+  background:var(--surface2); border:1px solid var(--border);
+  font-size:11px; font-weight:600; cursor:pointer; color:var(--text);
+}
 
 /* ── FAB ───────────────────────────────────────────── */
 .fab {
   position:fixed; bottom:76px; right:20px;
-  width:52px; height:52px; border-radius:16px;
-  background:var(--accent); color:#fff; font-size:24px;
+  width:50px; height:50px; border-radius:16px;
+  background:var(--accent); color:#fff; font-size:22px;
   display:flex; align-items:center; justify-content:center;
-  box-shadow:0 4px 20px rgba(212,69,12,.35);
+  box-shadow:0 4px 18px rgba(212,69,12,.35);
   cursor:pointer; border:none; transition:all .2s; z-index:40;
 }
 .fab:active { transform:scale(.92); }
@@ -237,8 +299,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 /* ── BOTTOM NAV ────────────────────────────────────── */
 .bottom-nav {
   position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:430px;
-  background:rgba(247,246,242,0.95); backdrop-filter:blur(12px);
+  width:100%; max-width:440px;
+  background:rgba(247,246,242,0.96); backdrop-filter:blur(12px);
   border-top:1px solid var(--border);
   display:flex; padding:8px 0 20px; z-index:50;
 }
@@ -248,7 +310,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   color:var(--text2); font-size:10px; font-weight:600; transition:color .15s;
 }
 .nav-item.active { color:var(--accent); }
-.nav-icon { font-size:20px; }
+.nav-icon { font-size:18px; }
 
 /* ── MODAL SHEET ───────────────────────────────────── */
 .overlay {
@@ -271,7 +333,6 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 
 .sheet-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:12px auto 0; }
 
-/* Modal header */
 .sheet-header {
   display:flex; align-items:center; gap:12px;
   padding:14px 18px; border-bottom:1px solid var(--border);
@@ -283,7 +344,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   border:1.5px solid var(--border);
 }
 .sheet-title-wrap { flex:1; min-width:0; }
-.sheet-filename { font-size:13px; font-weight:700; line-height:1.3; margin-bottom:3px; }
+.sheet-filename { font-size:13px; font-weight:700; line-height:1.3; margin-bottom:3px; word-break:break-word; }
 .sheet-filemeta { font-family:var(--mono); font-size:10px; color:var(--text2); }
 .sheet-close {
   width:30px; height:30px; border-radius:8px; flex-shrink:0;
@@ -300,7 +361,6 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 }
 .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
 
-/* Tab panels */
 .tab-panel { display:none; }
 .tab-panel.active { display:block; }
 
@@ -325,30 +385,28 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 }
 .open-btn:active { transform:scale(.95); }
 
-/* Preview box */
 .preview-box {
   border:1.5px solid var(--border); border-radius:var(--r-md);
-  background:var(--surface2); min-height:160px;
+  background:var(--surface2); min-height:140px;
   display:flex; align-items:center; justify-content:center;
-  text-align:center; padding:24px 20px; margin-bottom:12px;
+  text-align:center; padding:20px; margin-bottom:12px;
 }
-.preview-icon { font-size:44px; margin-bottom:10px; }
+.preview-icon { font-size:40px; margin-bottom:8px; }
 .preview-title { font-size:13px; font-weight:600; margin-bottom:4px; }
-.preview-sub { font-size:11px; color:var(--text2); line-height:1.6; }
+.preview-sub { font-size:11px; color:var(--text2); line-height:1.5; }
 
-/* Meta list */
 .meta-list { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); overflow:hidden; }
 .meta-row { display:flex; align-items:flex-start; padding:9px 13px; border-bottom:1px solid var(--border); gap:10px; }
 .meta-row:last-child { border-bottom:none; }
-.meta-key { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); width:76px; flex-shrink:0; padding-top:1px; }
-.meta-val { font-size:12px; flex:1; line-height:1.4; }
+.meta-key { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text2); width:80px; flex-shrink:0; padding-top:1px; }
+.meta-val { font-size:12px; flex:1; line-height:1.4; word-break:break-word; }
 
-/* Edit panel / form */
+/* Edit Form */
 .edit-panel { padding:14px 18px 0; }
 .form-group { margin-bottom:12px; }
 .form-label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text2); margin-bottom:5px; }
 .form-input, .form-select, .form-textarea {
-  width:100%; padding:10px 12px; border-radius:var(--r-sm);
+  width:100%; padding:9px 12px; border-radius:var(--r-sm);
   border:1.5px solid var(--border); background:var(--surface2);
   font-family:var(--sans); font-size:13px; color:var(--text);
   outline:none; transition:border-color .2s, background .2s; -webkit-appearance:none;
@@ -358,10 +416,9 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 .form-row { display:flex; gap:10px; }
 .form-row .form-group { flex:1; }
 
-/* Buttons */
 .modal-actions { padding:14px 18px 0; display:flex; flex-direction:column; gap:8px; }
 .btn {
-  width:100%; padding:13px; border-radius:var(--r-md);
+  width:100%; padding:12px; border-radius:var(--r-md);
   font-family:var(--sans); font-size:13px; font-weight:600;
   cursor:pointer; border:none; transition:all .15s;
   display:flex; align-items:center; justify-content:center; gap:7px;
@@ -370,36 +427,20 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 .btn-primary { background:var(--accent); color:#fff; }
 .btn-share   { background:var(--green-bg); color:var(--green); border:1.5px solid #b4dcc8; }
 .btn-danger  { background:var(--danger-bg); color:var(--danger); border:1.5px solid #f5b8be; }
-.btn-ghost   { background:var(--surface2); color:var(--text); border:1.5px solid var(--border); }
-
-/* ── UPLOAD AREA ──────────────────────────────────── */
-.upload-area {
-  border: 2px dashed var(--border2);
-  border-radius: var(--r-md);
-  padding: 24px 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .2s;
-  background: var(--surface2);
-  margin-bottom: 4px;
-}
-.upload-area:hover, .upload-area:active {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-}
 
 /* ── TOAST ─────────────────────────────────────────── */
 .toast {
-  position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(16px);
+  position:fixed; bottom:86px; left:50%; transform:translateX(-50%) translateY(16px);
   background:var(--text); color:#fff; padding:9px 18px;
   border-radius:20px; font-size:12px; font-weight:500;
   opacity:0; transition:all .3s cubic-bezier(.34,1.56,.64,1);
   z-index:200; white-space:nowrap; pointer-events:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* ── PAGINATION ────────────────────────────────────── */
-.pagination { display:flex; align-items:center; justify-content:center; gap:10px; padding:16px 18px 110px; }
+.pagination { display:flex; align-items:center; justify-content:center; gap:10px; padding:16px 18px 100px; }
 .page-btn {
   padding:7px 14px; border-radius:var(--r-sm);
   background:var(--surface); border:1.5px solid var(--border);
@@ -421,8 +462,12 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
         <div class="brand-name">Arsip<span>Ku</span></div>
       </div>
       <div class="topbar-actions">
-        <div class="icon-btn" :class="{ spin: loading }" @click="fetchDocs" title="Refresh">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <div class="sync-badge" :class="{ syncing: loading }">
+          <span v-if="loading">🔄 Sync...</span>
+          <span v-else>⚡ {{ allDocs.length }} file</span>
+        </div>
+        <div class="icon-btn" :class="{ spin: loading }" @click="forceRefresh" title="Refresh & Sinkronisasi">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
             <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0019.49 15"/>
           </svg>
@@ -430,20 +475,37 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
         <div class="icon-btn" @click="showStats = !showStats" title="Statistik">📊</div>
       </div>
     </div>
+
+    <!-- Search Input -->
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input class="search-input" v-model="search" @input="onSearch" placeholder="Cari nama file, sumber...">
+      <input class="search-input" v-model="search" @input="onSearchInput" placeholder="Cari regulasi, perihal, nama file, surat...">
+      <button class="search-clear" v-if="search" @click="clearSearch">✕</button>
     </div>
-    <div class="chips">
-      <div v-for="c in filters" :key="c.key"
-           class="chip" :class="{ active: activeFilter === c.key }"
-           @click="setFilter(c.key)">{{ c.label }}</div>
+
+    <!-- Row 1: Filter Tag / Jenis Dokumen (UU, PermenpanRB, Permendagri, dll) -->
+    <div class="filter-scroll">
+      <div v-for="t in tagFilters" :key="t.key"
+           class="chip" :class="{ active: activeTagFilter === t.key }"
+           @click="setTagFilter(t.key)">
+        <span>{{ t.label }}</span>
+        <span class="chip-count" v-if="t.count !== undefined">({{ t.count }})</span>
+      </div>
+    </div>
+
+    <!-- Row 2: Sub-filter Format File (Semua, PDF, Word, Excel, PPT, dll) -->
+    <div class="sub-chips">
+      <div v-for="f in formatFilters" :key="f.key"
+           class="sub-chip" :class="{ active: activeFormatFilter === f.key }"
+           @click="setFormatFilter(f.key)">
+        {{ f.label }}
+      </div>
     </div>
   </div>
 
   <!-- STATS STRIP -->
   <transition name="slide-down">
-    <div class="stats-strip" v-if="showStats && stats">
+    <div class="stats-strip" v-if="showStats">
       <div class="stat-card" v-for="s in statCards" :key="s.label">
         <div class="stat-icon">{{ s.icon }}</div>
         <div>
@@ -454,21 +516,23 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
     </div>
   </transition>
 
-  <!-- ERROR -->
+  <!-- ERROR BANNER -->
   <div class="error-banner" v-if="error">
     ⚠️ {{ error }}
+    <button style="margin-left:auto;background:none;border:none;cursor:pointer;font-weight:700" @click="error=''">✕</button>
   </div>
 
-  <!-- SECTION LABEL -->
-  <div class="section-label">
-    {{ sectionLabel }} <span style="color:var(--text2)">({{ total }})</span>
+  <!-- SECTION HEADER -->
+  <div class="section-header">
+    <div class="section-label">{{ activeFilterTitle }}</div>
+    <div class="section-count">{{ filteredDocs.length }} dari {{ allDocs.length }} dokumen</div>
   </div>
 
-  <!-- LOADING SKELETON -->
-  <div class="card-list" v-if="loading && docs.length === 0">
+  <!-- SKELETON LOADING (Hanya jika belum ada cache sama sekali) -->
+  <div class="card-list" v-if="loading && allDocs.length === 0">
     <div class="skeleton-card" v-for="i in 5" :key="i">
       <div style="display:flex;gap:12px;margin-bottom:10px">
-        <div class="skel" style="width:44px;height:52px;border-radius:10px;flex-shrink:0"></div>
+        <div class="skel" style="width:42px;height:50px;border-radius:10px;flex-shrink:0"></div>
         <div style="flex:1">
           <div class="skel" style="height:14px;width:80%;margin-bottom:8px"></div>
           <div class="skel" style="height:12px;width:60%;margin-bottom:8px"></div>
@@ -484,15 +548,21 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
   </div>
 
   <!-- CARD LIST -->
-  <div class="card-list" v-else-if="docs.length > 0">
-    <div class="doc-card" v-for="doc in docs" :key="doc.fileId" @click="openModal(doc)">
+  <div class="card-list" v-else-if="pagedDocs.length > 0">
+    <div class="doc-card" v-for="doc in pagedDocs" :key="doc.fileId" @click="openModal(doc)">
       <div class="card-top">
-        <div class="card-meta" style="margin-left:0">
+        <div class="file-thumb" :class="thumbClass(doc.kategori)">
+          {{ thumbIcon(doc.kategori) }}
+          <span class="file-thumb-ext">{{ extLabel(doc.kategori) }}</span>
+        </div>
+        <div class="card-meta">
           <div class="card-title">{{ doc.perihal || doc.namaFile }}</div>
-          <div class="card-filename" v-if="doc.perihal">{{ doc.namaFile }}</div>
-          <div class="card-source" v-if="doc.source" style="margin-bottom:6px">{{ doc.source }}</div>
+          <div class="card-filename" v-if="doc.perihal && doc.perihal !== doc.namaFile">{{ doc.namaFile }}</div>
+          <div class="card-source" v-if="doc.source">📍 {{ doc.source }}</div>
           <div class="tags">
-            <span class="tag" :class="tagClass(doc.kategori)">{{ doc.kategori }}</span>
+            <!-- Tag Regulasi / Jenis Dokumen -->
+            <span class="tag" :class="docTagClass(doc.tag)">{{ docTagLabel(doc.tag) }}</span>
+            <!-- Tag Status -->
             <span class="tag" :class="statusTagClass(doc.status)">{{ doc.status }}</span>
           </div>
         </div>
@@ -502,144 +572,147 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
           <div class="card-date" v-if="doc.tanggalSurat" style="color:var(--accent);font-weight:600">
             📅 {{ formatDate(doc.tanggalSurat) }}
           </div>
-          <div class="card-date" v-else style="opacity:0.5">{{ formatDate(doc.tanggal) }}</div>
+          <div class="card-date" v-else style="opacity:0.6">
+            📥 {{ formatDate(doc.tanggal) }}
+          </div>
         </div>
-        <div class="share-btn" @click.stop="quickShare(doc)">🔗</div>
+        <div class="share-btn" @click.stop="quickShare(doc)" title="Salin Link Google Drive">🔗</div>
       </div>
     </div>
   </div>
 
-  <!-- EMPTY -->
+  <!-- EMPTY STATE -->
   <div class="empty" v-else-if="!loading">
     <div class="empty-icon">📭</div>
-    <p>Tidak ada dokumen ditemukan</p>
+    <p>Tidak ada dokumen yang sesuai dengan pencarian atau filter saat ini.</p>
+    <button class="empty-btn" @click="resetFilters" v-if="search || activeTagFilter !== 'all' || activeFormatFilter !== 'all'">
+      🔄 Reset Pencarian & Filter
+    </button>
   </div>
 
   <!-- PAGINATION -->
   <div class="pagination" v-if="totalPages > 1">
     <button class="page-btn" :disabled="page <= 1" @click="changePage(page - 1)">← Prev</button>
-    <span class="page-info">{{ page }} / {{ totalPages }} <span style="color:var(--text2)">({{ total }})</span></span>
+    <span class="page-info">{{ page }} / {{ totalPages }} <span style="color:var(--text2)">({{ filteredDocs.length }})</span></span>
     <button class="page-btn" :disabled="page >= totalPages" @click="changePage(page + 1)">Next →</button>
   </div>
 
   <!-- FAB -->
-  <button class="fab" @click="openModal(null)">＋</button>
+  <button class="fab" @click="openModal(null)" title="Tambah Dokumen">＋</button>
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <div class="nav-item active"><div class="nav-icon">📄</div>Dokumen</div>
-    <div class="nav-item" @click="fetchDocs"><div class="nav-icon">🔄</div>Sync</div>
+    <div class="nav-item active" @click="resetFilters"><div class="nav-icon">📄</div>Dokumen</div>
+    <div class="nav-item" @click="forceRefresh"><div class="nav-icon">🔄</div>Sync</div>
     <div class="nav-item" @click="showStats = !showStats"><div class="nav-icon">📊</div>Statistik</div>
-    <div class="nav-item"><div class="nav-icon">⚙️</div>Setelan</div>
   </div>
 
-  <!-- MODAL OVERLAY -->
+  <!-- MODAL DETAIL / EDIT -->
   <div class="overlay" :class="{ show: modalOpen }" @click.self="closeModal">
     <div class="sheet">
       <div class="sheet-handle"></div>
 
-      <!-- Header -->
+      <!-- Header Modal -->
       <div class="sheet-header">
         <div class="sheet-thumb" :class="selectedDoc ? thumbClass(selectedDoc.kategori) : 'thumb-other'">
           {{ selectedDoc ? thumbIcon(selectedDoc.kategori) : '📄' }}
-          <span class="file-thumb-ext">{{ selectedDoc ? extLabel(selectedDoc.kategori) : '' }}</span>
+          <span class="file-thumb-ext">{{ selectedDoc ? extLabel(selectedDoc.kategori) : 'FILE' }}</span>
         </div>
         <div class="sheet-title-wrap">
-          <div class="sheet-filename">{{ selectedDoc ? selectedDoc.namaFile : 'Dokumen Baru' }}</div>
-          <div class="sheet-filemeta">{{ selectedDoc ? (selectedDoc.kategori + ' · ' + formatDate(selectedDoc.tanggal)) : 'Manual entry' }}</div>
+          <div class="sheet-filename">{{ selectedDoc ? (selectedDoc.perihal || selectedDoc.namaFile) : 'Dokumen Baru' }}</div>
+          <div class="sheet-filemeta">{{ selectedDoc ? (selectedDoc.kategori + ' · ' + (selectedDoc.tag || 'Lainnya')) : 'Entri Manual' }}</div>
         </div>
         <button class="sheet-close" @click="closeModal">✕</button>
       </div>
 
-      <!-- Tabs (hanya untuk dokumen existing) -->
+      <!-- Tabs -->
       <div class="sheet-tabs" v-if="selectedDoc">
         <div class="tab" :class="{ active: activeTab === 'view' }" @click="activeTab = 'view'">👁 Lihat</div>
         <div class="tab" :class="{ active: activeTab === 'edit' }" @click="activeTab = 'edit'">✏️ Edit</div>
       </div>
 
-      <!-- TAB: VIEW -->
+      <!-- TAB 1: VIEW -->
       <div class="tab-panel" :class="{ active: activeTab === 'view' && selectedDoc }">
         <div class="view-panel">
           <div class="view-link-row">
             <div class="view-link-name">
               <div>{{ selectedDoc ? selectedDoc.namaFile : '' }}</div>
-              <div>{{ selectedDoc ? selectedDoc.kategori : '' }}</div>
+              <div>{{ selectedDoc ? selectedDoc.kategori : '' }} · {{ selectedDoc ? docTagLabel(selectedDoc.tag) : '' }}</div>
             </div>
             <a class="open-btn" :href="selectedDoc ? selectedDoc.linkDrive : '#'" target="_blank" rel="noopener">
-              🔗 Buka
+              🔗 Buka di Drive
             </a>
           </div>
-          <div class="preview-box">
-            <div>
-              <div class="preview-icon">{{ selectedDoc ? thumbIcon(selectedDoc.kategori) : '📄' }}</div>
-              <div class="preview-title">File {{ selectedDoc ? selectedDoc.kategori : '' }}</div>
-              <div class="preview-sub">Tap <strong>Buka</strong> untuk melihat<br>file di Google Drive</div>
-            </div>
-          </div>
           <div class="meta-list" v-if="selectedDoc">
-            <div class="meta-row"><div class="meta-key">Perihal</div><div class="meta-val" :style="selectedDoc.perihal ? '' : 'color:var(--text2);font-style:italic'">{{ selectedDoc.perihal || 'Belum diisi' }}</div></div>
-            <div class="meta-row"><div class="meta-key">Tgl Surat</div><div class="meta-val" :style="selectedDoc.tanggalSurat ? '' : 'color:var(--text2);font-style:italic'">{{ selectedDoc.tanggalSurat ? formatDate(selectedDoc.tanggalSurat) : 'Belum diisi' }}</div></div>
-            <div class="meta-row"><div class="meta-key">Nama File</div><div class="meta-val">{{ selectedDoc.namaFile }}</div></div>
-            <div class="meta-row"><div class="meta-key">Kategori</div><div class="meta-val">{{ selectedDoc.kategori }}</div></div>
-            <div class="meta-row"><div class="meta-key">Sumber</div><div class="meta-val">{{ selectedDoc.source || '—' }}</div></div>
-            <div class="meta-row"><div class="meta-key">Tgl Masuk</div><div class="meta-val">{{ formatDate(selectedDoc.tanggal) }}</div></div>
-            <div class="meta-row"><div class="meta-key">Status</div><div class="meta-val">{{ selectedDoc.status }}</div></div>
-            <div class="meta-row"><div class="meta-key">OCR</div><div class="meta-val">{{ selectedDoc.ocrStatus }}</div></div>
+            <div class="meta-row">
+              <div class="meta-key">Tag / Jenis</div>
+              <div class="meta-val">
+                <span class="tag" :class="docTagClass(selectedDoc.tag)">{{ docTagLabel(selectedDoc.tag) }}</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-key">Perihal</div>
+              <div class="meta-val" :style="selectedDoc.perihal ? '' : 'color:var(--text2);font-style:italic'">
+                {{ selectedDoc.perihal || 'Belum diisi' }}
+              </div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-key">Tgl Surat</div>
+              <div class="meta-val">{{ selectedDoc.tanggalSurat ? formatDate(selectedDoc.tanggalSurat) : '—' }}</div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-key">Nama File</div>
+              <div class="meta-val">{{ selectedDoc.namaFile }}</div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-key">Kategori</div>
+              <div class="meta-val">{{ selectedDoc.kategori }}</div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-key">Sumber</div>
+              <div class="meta-val">{{ selectedDoc.source || '—' }}</div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-key">Tgl Sync</div>
+              <div class="meta-val">{{ formatDate(selectedDoc.tanggal) }}</div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-key">Status</div>
+              <div class="meta-val">{{ selectedDoc.status }}</div>
+            </div>
           </div>
         </div>
         <div class="modal-actions">
-          <button class="btn btn-share" @click="quickShare(selectedDoc)">🔗 Copy Link Drive</button>
+          <button class="btn btn-share" @click="quickShare(selectedDoc)">🔗 Salin Link Google Drive</button>
         </div>
       </div>
 
-      <!-- TAB: EDIT -->
+      <!-- TAB 2: EDIT -->
       <div class="tab-panel" :class="{ active: activeTab === 'edit' || !selectedDoc }">
-        <!-- Upload area (hanya untuk dokumen baru) -->
-        <div class="edit-panel" v-if="!selectedDoc">
-          <div class="upload-area" @click="triggerUpload" @dragover.prevent @drop.prevent="onFileDrop">
-            <input type="file" ref="fileInput" style="display:none" @change="onFileSelect"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar">
-            <div v-if="!uploadFile">
-              <div style="font-size:36px;margin-bottom:8px">📂</div>
-              <div style="font-size:13px;font-weight:600;margin-bottom:4px">Tap untuk pilih file</div>
-              <div style="font-size:11px;color:var(--text2)">PDF, Word, Excel, PPT, ZIP/RAR</div>
-            </div>
-            <div v-else style="text-align:left">
-              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">File dipilih:</div>
-              <div style="font-size:13px;font-weight:600;word-break:break-all">{{ uploadFile.name }}</div>
-              <div style="font-size:11px;color:var(--text2);margin-top:4px">{{ formatFileSize(uploadFile.size) }}</div>
-            </div>
-          </div>
-          <div style="text-align:center;font-size:11px;color:var(--text2);margin:8px 0 4px">atau isi manual tanpa upload</div>
-        </div>
         <div class="edit-panel">
-          <div class="form-row" v-if="!selectedDoc" style="display:none"></div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Tanggal Sync</label>
-              <input class="form-input" type="date" v-model="form.tanggal" readonly style="opacity:0.6;cursor:not-allowed">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Kategori</label>
-              <select class="form-select" v-model="form.kategori">
-                <option value="PDF">📕 PDF</option>
-                <option value="Word">📝 Word</option>
-                <option value="Excel">📊 Excel</option>
-                <option value="PowerPoint">📊 PowerPoint</option>
-                <option value="ZIP/RAR">🗜️ ZIP/RAR</option>
-                <option value="Gambar">🖼️ Gambar</option>
-                <option value="Dokumen">📄 Dokumen</option>
-              </select>
-            </div>
-          </div>
           <div class="form-group">
-            <label class="form-label">Perihal / Hal Surat</label>
-            <textarea class="form-textarea" v-model="form.perihal" placeholder="Perihal atau hal surat... (akan diisi otomatis via OCR)"></textarea>
+            <label class="form-label">Perihal / Hal Surat / Judul Resmi</label>
+            <textarea class="form-textarea" v-model="form.perihal" placeholder="Ketik perihal surat, judul dokumen, atau nama yang mudah dicari..."></textarea>
           </div>
+
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Tanggal Surat</label>
-              <input class="form-input" type="date" v-model="form.tanggalSurat">
+              <label class="form-label">Tag / Jenis Dokumen</label>
+              <select class="form-select" v-model="form.tag">
+                <option value="UU">📜 Undang-Undang (UU)</option>
+                <option value="PP">📜 Peraturan Pemerintah (PP)</option>
+                <option value="Perpres">📜 Peraturan Presiden (Perpres)</option>
+                <option value="PermenpanRB">🏛️ PermenpanRB / Kepmenpan</option>
+                <option value="Permendagri">🏛️ Permendagri</option>
+                <option value="Permenhub">🏛️ Permenhub</option>
+                <option value="Perbup/Perda">🏢 Perbup / Perda / Perwal</option>
+                <option value="Surat Edaran">📑 Surat Edaran (SE)</option>
+                <option value="SK">📋 Surat Keputusan (SK)</option>
+                <option value="Undangan">✉️ Undangan / Rapat</option>
+                <option value="Laporan/SAKIP">📊 Laporan / SAKIP / RKA</option>
+                <option value="Nota Dinas">📝 Nota Dinas / SPT</option>
+                <option value="Lainnya">📄 Dokumen Lainnya</option>
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label">Status</label>
@@ -651,15 +724,37 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
               </select>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Sumber</label>
-            <input class="form-input" type="text" v-model="form.source" placeholder="WhatsApp, Email, dst...">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tanggal Surat</label>
+              <input class="form-input" type="date" v-model="form.tanggalSurat">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Format File</label>
+              <select class="form-select" v-model="form.kategori">
+                <option value="PDF">📕 PDF</option>
+                <option value="Word">📝 Word</option>
+                <option value="Excel">📊 Excel</option>
+                <option value="PowerPoint">📊 PowerPoint</option>
+                <option value="ZIP/RAR">🗜️ ZIP/RAR</option>
+                <option value="Gambar">🖼️ Gambar</option>
+                <option value="Dokumen">📄 Dokumen</option>
+              </select>
+            </div>
           </div>
+
           <div class="form-group">
-            <label class="form-label">Nama File</label>
-            <input class="form-input" type="text" v-model="form.namaFile" placeholder="Nama file...">
+            <label class="form-label">Nama File Asli</label>
+            <input class="form-input" type="text" v-model="form.namaFile" placeholder="Nama file asli di drive...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sumber Dokumen</label>
+            <input class="form-input" type="text" v-model="form.source" placeholder="Contoh: WhatsApp, KemenpanRB, Setda, BKP2D...">
           </div>
         </div>
+
         <div class="modal-actions">
           <button class="btn btn-primary" @click="saveDoc" :disabled="saving">
             {{ saving ? '⏳ Menyimpan...' : (selectedDoc ? '💾 Simpan Perubahan' : '➕ Tambah Dokumen') }}
@@ -669,7 +764,6 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
           </button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -680,10 +774,36 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:v
 <script>
 const { createApp, ref, computed, onMounted } = Vue;
 
-// ── KONFIGURASI ─────────────────────────────────────
 const API_URL = "https://script.google.com/macros/s/AKfycbwWN9FWwrvWcwe6UkbZ0ZDiefvtvDx9id5eZvKxQK8cdTrM2Zt1urcG8rXnpEJzvh1p_A/exec";
+const CACHE_KEY = "arsipku_docs_cache_v2";
 
-// ── HELPERS ──────────────────────────────────────────
+// ── HEURISTIC AUTO-TAGGING REGULASI & KEDINASAN ───────
+function detectDocTag(namaFile = "", perihal = "") {
+  const text = (namaFile + " " + perihal).toLowerCase();
+
+  // 1. Regulasi Tingkat Pusat
+  if (/\b(uu\s*\d+|undang[\s-]*undang)\b/i.test(text) && !/\b(perpu|buku)\b/i.test(text)) return "UU";
+  if (/\b(perpres|peraturan\s+presiden)\b/i.test(text)) return "Perpres";
+  if (/\b(pp[\s_-]*\d+|peraturan\s+pemerintah)\b/i.test(text)) return "PP";
+
+  // 2. Regulasi Kementerian
+  if (/\b(permenpan|kepmenpan|menpan)\b/i.test(text)) return "PermenpanRB";
+  if (/\b(permendagri|kemendagri)\b/i.test(text)) return "Permendagri";
+  if (/\b(permenhub|kemenhub|\bpm[\s_-]*\d+)\b/i.test(text)) return "Permenhub";
+
+  // 3. Regulasi Daerah
+  if (/\b(perbup|perda|perwal|peraturan\s+bupati|peraturan\s+daerah)\b/i.test(text)) return "Perbup/Perda";
+
+  // 4. Surat & Administrasi Kedinasan
+  if (/\b(surat\s+edaran|\bse\b)\b/i.test(text)) return "Surat Edaran";
+  if (/\b(sk\b|surat\s+keputusan|keputusan\s+bupati|sk\s+tim)\b/i.test(text)) return "SK";
+  if (/\b(undangan|rapat|entry\s+meeting|sosialisasi|pembukaan|peresmian|pam\b)\b/i.test(text)) return "Undangan";
+  if (/\b(laporan|sakip|lkjip|akip|spbe|rka|dpa|renstra|iku|matrik|profiling|evaluasi|gis\b)\b/i.test(text)) return "Laporan/SAKIP";
+  if (/\b(nota\s+dinas|surat\s+tugas|spt|telaah|permohonan|permintaan)\b/i.test(text)) return "Nota Dinas";
+
+  return "Lainnya";
+}
+
 const KAT_CONFIG = {
   "PDF"        : { icon:"📕", thumb:"thumb-pdf",   tag:"tag-pdf",   ext:"PDF"  },
   "Word"       : { icon:"📝", thumb:"thumb-word",  tag:"tag-word",  ext:"DOC"  },
@@ -691,107 +811,201 @@ const KAT_CONFIG = {
   "PowerPoint" : { icon:"📊", thumb:"thumb-ppt",   tag:"tag-ppt",   ext:"PPT"  },
   "ZIP/RAR"    : { icon:"🗜️", thumb:"thumb-zip",   tag:"tag-zip",   ext:"ZIP"  },
   "Gambar"     : { icon:"🖼️", thumb:"thumb-other", tag:"tag-other", ext:"IMG"  },
-  "Peta"       : { icon:"🗺️", thumb:"thumb-zip",   tag:"tag-zip",   ext:"KMZ"  },
 };
 const DEF_KAT = { icon:"📄", thumb:"thumb-other", tag:"tag-other", ext:"FILE" };
-
 function getKat(k) { return KAT_CONFIG[k] || DEF_KAT; }
+
+const TAG_LABELS = {
+  "UU": "📜 UU",
+  "PP": "📜 PP",
+  "Perpres": "📜 Perpres",
+  "PermenpanRB": "🏛️ PermenpanRB",
+  "Permendagri": "🏛️ Permendagri",
+  "Permenhub": "🏛️ Permenhub",
+  "Perbup/Perda": "🏢 Perbup/Perda",
+  "Surat Edaran": "📑 Surat Edaran",
+  "SK": "📋 SK",
+  "Undangan": "✉️ Undangan",
+  "Laporan/SAKIP": "📊 Laporan/SAKIP",
+  "Nota Dinas": "📝 Nota Dinas",
+  "Lainnya": "📄 Lainnya",
+};
 
 createApp({
   setup() {
-    // ── STATE ──────────────────────────────────────
-    const docs        = ref([]);
-    const stats       = ref(null);
-    const loading     = ref(false);
-    const saving      = ref(false);
-    const error       = ref("");
-    const search      = ref("");
-    const activeFilter= ref("all");
-    const page        = ref(1);
-    const total       = ref(0);
-    const totalPages  = ref(1);
-    const showStats   = ref(false);
-    const modalOpen   = ref(false);
-    const selectedDoc = ref(null);
-    const activeTab   = ref("view");
-    const toastMsg    = ref("");
-    const toastVisible= ref(false);
-    let   searchTimer = null;
-    let   toastTimer  = null;
+    const allDocs            = ref([]);
+    const loading            = ref(false);
+    const saving             = ref(false);
+    const error              = ref("");
+    const search             = ref("");
+    const activeTagFilter    = ref("all");
+    const activeFormatFilter = ref("all");
+    const page               = ref(1);
+    const pageSize           = 15;
+    const showStats          = ref(false);
+    const modalOpen          = ref(false);
+    const selectedDoc        = ref(null);
+    const activeTab          = ref("view");
+    const toastMsg           = ref("");
+    const toastVisible       = ref(false);
+    let   toastTimer         = null;
 
-    const form = ref({ tanggal:"", kategori:"PDF", source:"", status:"BARU", namaFile:"" });
-    const uploadFile  = ref(null);
-    const fileInput   = ref(null);
+    const form = ref({
+      fileId:"", namaFile:"", perihal:"", kategori:"PDF",
+      source:"", status:"BARU", tanggalSurat:"", tag:"Lainnya"
+    });
 
-    function triggerUpload() { fileInput.value?.click(); }
-    function onFileSelect(e) {
-      const f = e.target.files[0];
-      if (!f) return;
-      uploadFile.value = f;
-      if (!form.value.namaFile) form.value.namaFile = f.name;
-      // Auto-detect kategori
-      const ext = f.name.split(".").pop().toLowerCase();
-      const extMap = { pdf:"PDF", doc:"Word", docx:"Word", xls:"Excel", xlsx:"Excel", ppt:"PowerPoint", pptx:"PowerPoint", zip:"ZIP/RAR", rar:"ZIP/RAR" };
-      if (extMap[ext]) form.value.kategori = extMap[ext];
-    }
-    function onFileDrop(e) {
-      const f = e.dataTransfer.files[0];
-      if (!f) return;
-      uploadFile.value = f;
-      if (!form.value.namaFile) form.value.namaFile = f.name;
-    }
-    function formatFileSize(bytes) {
-      if (bytes < 1024) return bytes + " B";
-      if (bytes < 1048576) return (bytes/1024).toFixed(1) + " KB";
-      return (bytes/1048576).toFixed(1) + " MB";
+    // ── DATA NORMALIZATION ────────────────────────────
+    function normalizeDoc(raw) {
+      const namaFile = String(raw.NAMA_FILE || raw.namaFile || "").trim();
+      const perihal  = String(raw.PERIHAL || raw.perihal || "").trim();
+      const detectedTag = raw.TAG || raw.tag || detectDocTag(namaFile, perihal);
+
+      return {
+        fileId      : String(raw.FILE_ID || raw.fileId || raw.id || ""),
+        namaFile    : namaFile,
+        perihal     : perihal,
+        kategori    : String(raw.KATEGORI || raw.kategori || "PDF").trim(),
+        source      : String(raw.SOURCE || raw.source || "").trim(),
+        status      : String(raw.STATUS || raw.status || "BARU").trim(),
+        ocrStatus   : String(raw.OCR_STATUS || raw.ocrStatus || "PENDING").trim(),
+        tanggal     : raw.TANGGAL || raw.tanggal || "",
+        tanggalSurat: raw.TANGGAL_SURAT ? String(raw.TANGGAL_SURAT).split("T")[0] : (raw.tanggalSurat ? String(raw.tanggalSurat).split("T")[0] : ""),
+        linkDrive   : raw.LINK_DRIVE || raw.linkDrive || (raw.FILE_ID ? `https://drive.google.com/file/d/${raw.FILE_ID}/view` : "#"),
+        tag         : detectedTag,
+      };
     }
 
-    // ── COMPUTED ────────────────────────────────────
-    const filters = [
-      { key:"all",        label:"Semua"      },
-      { key:"PDF",        label:"📕 PDF"     },
-      { key:"Word",       label:"📝 Word"    },
-      { key:"Excel",      label:"📊 Excel"   },
-      { key:"PowerPoint", label:"📊 PPT"     },
-      { key:"ZIP/RAR",    label:"🗜️ ZIP/RAR" },
+    // ── INSTANT CLIENT-SIDE FILTERING & SEARCH ────────
+    const filteredDocs = computed(() => {
+      let list = allDocs.value;
+
+      // 1. Filter Format File
+      if (activeFormatFilter.value !== "all") {
+        list = list.filter(d => d.kategori.toLowerCase() === activeFormatFilter.value.toLowerCase());
+      }
+
+      // 2. Filter Tag Regulasi/Dokumen
+      if (activeTagFilter.value !== "all") {
+        list = list.filter(d => d.tag === activeTagFilter.value);
+      }
+
+      // 3. Multi-word Case-Insensitive Search (Pencarian Instan)
+      const q = search.value.trim().toLowerCase();
+      if (q) {
+        const words = q.split(/\s+/).filter(Boolean);
+        list = list.filter(d => {
+          // Cari di seluruh field penting sekaligus
+          const corpus = `${d.namaFile} ${d.perihal} ${d.source} ${d.tag} ${d.kategori} ${d.status} ${formatDate(d.tanggalSurat)}`.toLowerCase();
+          return words.every(w => corpus.includes(w));
+        });
+      }
+
+      // Sort: Utamakan tanggal surat desc, fallback ke tanggal masuk desc
+      return list.sort((a, b) => {
+        const da = a.tanggalSurat || a.tanggal || "";
+        const db = b.tanggalSurat || b.tanggal || "";
+        return db.localeCompare(da);
+      });
+    });
+
+    const totalPages = computed(() => Math.ceil(filteredDocs.value.length / pageSize) || 1);
+
+    const pagedDocs = computed(() => {
+      const start = (page.value - 1) * pageSize;
+      return filteredDocs.value.slice(start, start + pageSize);
+    });
+
+    // ── TAG FILTERS WITH COUNTS ───────────────────────
+    const tagFilters = computed(() => {
+      const counts = {};
+      allDocs.value.forEach(d => {
+        counts[d.tag] = (counts[d.tag] || 0) + 1;
+      });
+
+      const tags = [
+        { key: "all",           label: "Semua Tag",             count: allDocs.value.length },
+        { key: "PermenpanRB",   label: "🏛️ PermenpanRB",        count: counts["PermenpanRB"] || 0 },
+        { key: "Permendagri",   label: "🏛️ Permendagri",        count: counts["Permendagri"] || 0 },
+        { key: "UU",            label: "📜 UU",                 count: counts["UU"] || 0 },
+        { key: "Perbup/Perda",  label: "🏢 Perbup/Perda",       count: counts["Perbup/Perda"] || 0 },
+        { key: "Surat Edaran",  label: "📑 Surat Edaran",       count: counts["Surat Edaran"] || 0 },
+        { key: "SK",            label: "📋 SK",                 count: counts["SK"] || 0 },
+        { key: "Undangan",      label: "✉️ Undangan",           count: counts["Undangan"] || 0 },
+        { key: "Laporan/SAKIP", label: "📊 Laporan/SAKIP",      count: counts["Laporan/SAKIP"] || 0 },
+        { key: "PP",            label: "📜 PP",                 count: counts["PP"] || 0 },
+        { key: "Perpres",       label: "📜 Perpres",            count: counts["Perpres"] || 0 },
+        { key: "Permenhub",     label: "🏛️ Permenhub",          count: counts["Permenhub"] || 0 },
+        { key: "Nota Dinas",    label: "📝 Nota Dinas",         count: counts["Nota Dinas"] || 0 },
+        { key: "Lainnya",       label: "📄 Lainnya",            count: counts["Lainnya"] || 0 },
+      ];
+      return tags;
+    });
+
+    const formatFilters = [
+      { key: "all",        label: "Semua Format" },
+      { key: "PDF",        label: "📕 PDF" },
+      { key: "Word",       label: "📝 Word" },
+      { key: "Excel",      label: "📊 Excel" },
+      { key: "PowerPoint", label: "📊 PPT" },
+      { key: "ZIP/RAR",    label: "🗜️ ZIP" },
     ];
 
-    const sectionLabel = computed(() => {
-      if (activeFilter.value === "all") return "Dokumen Terbaru";
-      return "Filter: " + activeFilter.value;
+    const activeFilterTitle = computed(() => {
+      if (search.value.trim()) return `Hasil: "${search.value.trim()}"`;
+      if (activeTagFilter.value !== "all") return `Tag: ${TAG_LABELS[activeTagFilter.value] || activeTagFilter.value}`;
+      if (activeFormatFilter.value !== "all") return `Format: ${activeFormatFilter.value}`;
+      return "Dokumen Terbaru";
     });
 
     const statCards = computed(() => {
-      if (!stats.value) return [];
-      const s = stats.value;
-      // Hitung total Excel + PowerPoint + ZIP
-      const excelCount = (s.byKategori?.["Excel"] || 0);
-      const pptCount   = (s.byKategori?.["PowerPoint"] || 0);
-      const zipCount   = (s.byKategori?.["ZIP/RAR"] || 0);
-      const wordCount  = (s.byKategori?.["Word"] || 0);
-      const pdfCount   = (s.byKategori?.["PDF"] || 0);
-      const lainnya    = s.total - pdfCount - wordCount - excelCount - pptCount - zipCount;
+      const total = allDocs.value.length;
+      let pdfCount = 0, wordCount = 0, excelCount = 0, baruCount = 0, prosesCount = 0, selesaiCount = 0;
+      allDocs.value.forEach(d => {
+        if (d.kategori === "PDF") pdfCount++;
+        else if (d.kategori === "Word") wordCount++;
+        else if (d.kategori === "Excel") excelCount++;
+
+        if (d.status === "BARU") baruCount++;
+        else if (d.status === "DIPROSES") prosesCount++;
+        else if (d.status === "SELESAI") selesaiCount++;
+      });
       return [
-        { icon:"📄", val: s.total,                                    label:"Total"    },
-        { icon:"📕", val: pdfCount,                                   label:"PDF"      },
-        { icon:"📝", val: wordCount,                                  label:"Word"     },
-        { icon:"📊", val: excelCount,                                 label:"Excel"    },
-        { icon:"📊", val: pptCount,                                   label:"PPT"      },
-        { icon:"🗜️", val: zipCount,                                   label:"ZIP/RAR"  },
-        { icon:"🆕", val: s.byStatus?.["BARU"]        || 0,          label:"Baru"     },
-        { icon:"⚙️", val: s.byStatus?.["DIPROSES"]    || 0,          label:"Diproses" },
-        { icon:"✅", val: s.byStatus?.["SELESAI"]     || 0,          label:"Selesai"  },
-        { icon:"🗃️", val: s.byStatus?.["ARSIP"]       || 0,          label:"Arsip"    },
+        { icon: "📄", val: total,        label: "Total" },
+        { icon: "📕", val: pdfCount,     label: "PDF" },
+        { icon: "📝", val: wordCount,    label: "Word" },
+        { icon: "📊", val: excelCount,   label: "Excel" },
+        { icon: "🆕", val: baruCount,    label: "Baru" },
+        { icon: "⚙️", val: prosesCount,  label: "Diproses" },
+        { icon: "✅", val: selesaiCount, label: "Selesai" },
       ];
     });
 
-    // ── FILE TYPE HELPERS ────────────────────────────
-    function thumbClass(k)  { return getKat(k).thumb; }
-    function thumbIcon(k)   { return getKat(k).icon;  }
-    function extLabel(k)    { return getKat(k).ext;   }
-    function tagClass(k)    { return getKat(k).tag;   }
+    // ── STYLING HELPERS ──────────────────────────────
+    function thumbClass(k)     { return getKat(k).thumb; }
+    function thumbIcon(k)      { return getKat(k).icon; }
+    function extLabel(k)       { return getKat(k).ext; }
+    function docTagLabel(t)    { return TAG_LABELS[t] || t || "Lainnya"; }
+    function docTagClass(t) {
+      const map = {
+        "UU": "tag-doc-uu",
+        "PP": "tag-doc-pp",
+        "Perpres": "tag-doc-perpres",
+        "PermenpanRB": "tag-doc-permenpan",
+        "Permendagri": "tag-doc-permendagri",
+        "Permenhub": "tag-doc-permenhub",
+        "Perbup/Perda": "tag-doc-perbup",
+        "Surat Edaran": "tag-doc-se",
+        "SK": "tag-doc-sk",
+        "Undangan": "tag-doc-undangan",
+        "Laporan/SAKIP": "tag-doc-laporan",
+        "Nota Dinas": "tag-doc-notadinas",
+      };
+      return map[t] || "tag-doc-lainnya";
+    }
+
     function statusTagClass(s) {
-      if (s === "BARU")     return "tag-baru";
+      if (s === "BARU") return "tag-baru";
       if (s === "DIPROSES") return "tag-proses";
       return "tag-arsip";
     }
@@ -800,97 +1014,122 @@ createApp({
       if (!d) return "—";
       try {
         const dt = new Date(d);
+        if (isNaN(dt.getTime())) return d;
         return dt.toLocaleDateString("id-ID", { day:"2-digit", month:"short", year:"numeric" });
       } catch { return d; }
     }
 
-    // ── API CALLS ─────────────────────────────────────
-    async function apiFetch(params) {
-      const url = new URL(API_URL);
-      Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-      const res  = await fetch(url.toString());
-      const json = await res.json();
-      if (json.status !== "ok") throw new Error(json.message || "API error");
-      return json.data;
+    // ── API & CACHE SYNC ──────────────────────────────
+    function loadFromCache() {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            allDocs.value = parsed.map(normalizeDoc);
+          }
+        }
+      } catch (e) {
+        console.warn("Gagal membaca cache:", e);
+      }
     }
 
-    async function fetchDocs() {
-      loading.value = true;
-      error.value   = "";
+    function saveToCache(data) {
       try {
-        const params = {
-          action : "list",
-          page   : page.value,
-          limit  : 15,
-          sort   : "tanggal",
-          order  : "desc",
-        };
-        if (activeFilter.value !== "all") params.filter = activeFilter.value;
-        if (search.value.trim())          params.search = search.value.trim();
-
-        const data     = await apiFetch(params);
-        // Sort by tanggalSurat desc (jika ada), fallback ke tanggal sync
-        docs.value = data.docs.sort((a, b) => {
-          const da = a.tanggalSurat || a.tanggal || "";
-          const db = b.tanggalSurat || b.tanggal || "";
-          return db.localeCompare(da);
-        });
-        total.value     = data.total;
-        totalPages.value= data.totalPages;
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       } catch (e) {
-        error.value = "Gagal memuat data: " + e.message;
+        console.warn("Gagal menyimpan cache:", e);
+      }
+    }
+
+    async function fetchDocs(silent = false) {
+      if (!silent) loading.value = true;
+      error.value = "";
+      try {
+        const url = new URL(API_URL);
+        url.searchParams.set("action", "list");
+        const res = await fetch(url.toString());
+        const json = await res.json();
+        if (json.status !== "ok") throw new Error(json.message || "Gagal mengambil data dari Google Sheet");
+
+        const rawList = (json.data && json.data.data) ? json.data.data : (json.data && json.data.docs ? json.data.docs : []);
+        const normalized = rawList.map(normalizeDoc);
+        allDocs.value = normalized;
+        saveToCache(normalized);
+      } catch (e) {
+        console.error(e);
+        if (allDocs.value.length === 0) {
+          error.value = "Gagal memuat data: " + e.message;
+        } else {
+          showToast("⚠️ Menggunakan data offline/cache");
+        }
       } finally {
         loading.value = false;
       }
     }
 
-    async function fetchStats() {
-      try {
-        stats.value = await apiFetch({ action:"stats" });
-      } catch {}
+    function forceRefresh() {
+      fetchDocs(false);
+      showToast("🔄 Menyinkronkan dengan Google Drive...");
     }
 
-    // ── FILTER & SEARCH ──────────────────────────────
-    function setFilter(key) {
-      activeFilter.value = key;
+    // ── FILTER CONTROLS ───────────────────────────────
+    function setTagFilter(key) {
+      activeTagFilter.value = key;
       page.value = 1;
-      fetchDocs();
     }
 
-    function onSearch() {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => { page.value = 1; fetchDocs(); }, 400);
+    function setFormatFilter(key) {
+      activeFormatFilter.value = key;
+      page.value = 1;
+    }
+
+    function onSearchInput() {
+      page.value = 1;
+    }
+
+    function clearSearch() {
+      search.value = "";
+      page.value = 1;
+    }
+
+    function resetFilters() {
+      search.value = "";
+      activeTagFilter.value = "all";
+      activeFormatFilter.value = "all";
+      page.value = 1;
     }
 
     function changePage(p) {
       page.value = p;
-      fetchDocs();
       window.scrollTo({ top:0, behavior:"smooth" });
     }
 
-    // ── MODAL ─────────────────────────────────────────
+    // ── MODAL & CRUD ──────────────────────────────────
     function openModal(doc) {
       selectedDoc.value = doc;
-      activeTab.value   = doc ? "view" : "edit";
+      activeTab.value = doc ? "view" : "edit";
       if (doc) {
         form.value = {
-          tanggal      : doc.tanggal      ? doc.tanggal.split(" ")[0] : "",
-          kategori     : String(doc.kategori     || "PDF"),
-          source       : String(doc.source       || ""),
-          status       : String(doc.status       || "BARU"),
-          namaFile     : String(doc.namaFile     || ""),
-          perihal      : String(doc.perihal      || ""),
-          tanggalSurat : String(doc.tanggalSurat || ""),
+          fileId      : doc.fileId,
+          namaFile    : doc.namaFile,
+          perihal     : doc.perihal,
+          kategori    : doc.kategori || "PDF",
+          source      : doc.source || "",
+          status      : doc.status || "BARU",
+          tanggalSurat: doc.tanggalSurat || "",
+          tag         : doc.tag || "Lainnya"
         };
       } else {
         form.value = {
-          tanggal      : new Date().toISOString().split("T")[0],
-          kategori     : "PDF",
-          source       : "WhatsApp",
-          status       : "BARU",
-          namaFile     : "",
-          perihal      : "",
-          tanggalSurat : "",
+          fileId      : "",
+          namaFile    : "",
+          perihal     : "",
+          kategori    : "PDF",
+          source      : "WhatsApp",
+          status      : "BARU",
+          tanggalSurat: "",
+          tag         : "Lainnya"
         };
       }
       modalOpen.value = true;
@@ -900,49 +1139,52 @@ createApp({
     function closeModal() {
       modalOpen.value = false;
       document.body.style.overflow = "";
-      uploadFile.value = null;
-      if (fileInput.value) fileInput.value.value = "";
     }
 
-    // ── CRUD ──────────────────────────────────────────
     async function saveDoc() {
-      if (!form.value.namaFile.trim() && !uploadFile.value) { showToast("⚠️ Nama file atau pilih file dulu!"); return; }
-      if (!form.value.namaFile.trim() && uploadFile.value) {
-        form.value.namaFile = uploadFile.value.name;
+      if (!form.value.namaFile.trim() && !form.value.perihal.trim()) {
+        showToast("⚠️ Nama file atau perihal wajib diisi!");
+        return;
       }
+
       saving.value = true;
       try {
-        if (selectedDoc.value) {
-          // UPDATE via GET (CORS-safe untuk Vercel)
-          await apiFetch({
-            action       : "update",
-            fileId       : selectedDoc.value.fileId,
-            namaFile     : form.value.namaFile,
-            kategori     : form.value.kategori,
-            source       : form.value.source,
-            status       : form.value.status,
-            perihal      : form.value.perihal,
-            tanggalSurat : form.value.tanggalSurat,
-          });
-          // Update lokal langsung agar card tidak perlu tunggu refetch
-          const idx = docs.value.findIndex(d => d.fileId === selectedDoc.value.fileId);
-          if (idx >= 0) {
-            docs.value[idx] = {
-              ...docs.value[idx],
-              namaFile     : form.value.namaFile,
-              kategori     : form.value.kategori,
-              source       : form.value.source,
-              status       : form.value.status,
-              perihal      : form.value.perihal,
-              tanggalSurat : form.value.tanggalSurat,
+        if (selectedDoc.value && selectedDoc.value.fileId) {
+          // 1. Update data di memori lokal secara instan
+          const idx = allDocs.value.findIndex(d => d.fileId === selectedDoc.value.fileId);
+          if (idx !== -1) {
+            allDocs.value[idx] = {
+              ...allDocs.value[idx],
+              namaFile    : form.value.namaFile,
+              perihal     : form.value.perihal,
+              kategori    : form.value.kategori,
+              source      : form.value.source,
+              status      : form.value.status,
+              tanggalSurat: form.value.tanggalSurat,
+              tag         : form.value.tag,
             };
+            saveToCache(allDocs.value);
           }
-          showToast("✅ Perubahan disimpan");
+
+          // 2. Kirim update ke Google Apps Script di background
+          const url = new URL(API_URL);
+          url.searchParams.set("action", "update");
+          url.searchParams.set("fileId", selectedDoc.value.fileId);
+          url.searchParams.set("namaFile", form.value.namaFile);
+          url.searchParams.set("perihal", form.value.perihal);
+          url.searchParams.set("kategori", form.value.kategori);
+          url.searchParams.set("source", form.value.source);
+          url.searchParams.set("status", form.value.status);
+          url.searchParams.set("tanggalSurat", form.value.tanggalSurat);
+
+          fetch(url.toString()).catch(e => console.warn("Background update warning:", e));
+
+          showToast("✅ Perubahan disimpan!");
+          closeModal();
         } else {
-          showToast("ℹ️ Tambah dokumen manual belum tersedia di versi ini");
+          showToast("ℹ️ Tambah file baru manual silakan kirim via WhatsApp.");
+          closeModal();
         }
-        closeModal();
-        fetchDocs();
       } catch (e) {
         showToast("❌ Gagal: " + e.message);
       } finally {
@@ -951,13 +1193,22 @@ createApp({
     }
 
     async function deleteDoc() {
-      if (!confirm("Hapus dokumen ini dari Sheet?")) return;
+      if (!confirm("Hapus dokumen ini dari daftar?")) return;
       saving.value = true;
       try {
-        await apiFetch({ action:"delete", fileId: selectedDoc.value.fileId });
-        showToast("🗑 Dokumen dihapus");
+        const fileId = selectedDoc.value.fileId;
+        // Hapus lokal dulu
+        allDocs.value = allDocs.value.filter(d => d.fileId !== fileId);
+        saveToCache(allDocs.value);
+
+        // Hapus di Google Apps Script
+        const url = new URL(API_URL);
+        url.searchParams.set("action", "delete");
+        url.searchParams.set("fileId", fileId);
+        fetch(url.toString()).catch(e => console.warn("Background delete warning:", e));
+
+        showToast("🗑 Dokumen dihapus!");
         closeModal();
-        fetchDocs();
       } catch (e) {
         showToast("❌ Gagal: " + e.message);
       } finally {
@@ -966,44 +1217,39 @@ createApp({
     }
 
     function quickShare(doc) {
-      if (!doc) return;
+      if (!doc || !doc.linkDrive) return;
       navigator.clipboard.writeText(doc.linkDrive).catch(() => {});
-      showToast("🔗 Link disalin!");
+      showToast("🔗 Link Drive disalin!");
     }
 
-    // ── TOAST ──────────────────────────────────────────
     function showToast(msg) {
-      toastMsg.value     = msg;
+      toastMsg.value = msg;
       toastVisible.value = true;
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => { toastVisible.value = false; }, 2400);
     }
 
-    // ── INIT ───────────────────────────────────────────
+    // ── INITIALIZATION ────────────────────────────────
     onMounted(() => {
-      fetchDocs();
-      fetchStats();
+      // 1. Muat cache lokal seketika (0 ms)
+      loadFromCache();
+      // 2. Ambil update terbaru dari Google Drive/Script
+      fetchDocs(allDocs.value.length > 0);
     });
 
     return {
-      docs, stats, loading, saving, error, search,
-      activeFilter, page, total, totalPages, showStats,
-      modalOpen, selectedDoc, activeTab, form,
-      toastMsg, toastVisible, filters, sectionLabel, statCards,
-      thumbClass, thumbIcon, extLabel, tagClass, statusTagClass,
-      formatDate, fetchDocs, setFilter, onSearch, changePage,
-      openModal, closeModal, saveDoc, deleteDoc, quickShare,
+      allDocs, loading, saving, error, search,
+      activeTagFilter, activeFormatFilter, page, totalPages,
+      pagedDocs, filteredDocs, tagFilters, formatFilters,
+      activeFilterTitle, statCards, showStats, modalOpen,
+      selectedDoc, activeTab, form, toastMsg, toastVisible,
+      thumbClass, thumbIcon, extLabel, docTagClass, docTagLabel,
+      statusTagClass, formatDate, forceRefresh, setTagFilter,
+      setFormatFilter, onSearchInput, clearSearch, resetFilters,
+      changePage, openModal, closeModal, saveDoc, deleteDoc, quickShare
     };
   }
 }).mount("#app");
-</script>
-<script>
-  // Unregister semua service worker lama dulu
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(reg => reg.unregister());
-    });
-  }
 </script>
 </body>
 </html>
