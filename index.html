@@ -712,6 +712,47 @@ html, body {
 }
 .btn-copy-link:active { background: var(--border); }
 
+/* AI Extract Button inside Modal */
+.ai-action-bar {
+  padding: 12px 18px 0;
+}
+.btn-ai-extract {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+  border: 1.5px solid #c7d2fe;
+  color: #4338ca;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(67, 56, 202, 0.08);
+}
+.btn-ai-extract:hover {
+  background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
+  border-color: #a5b4fc;
+}
+.btn-ai-extract:active { transform: scale(0.985); }
+.btn-ai-extract:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ai-sparkle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6366f1;
+}
+.ai-sparkle-icon.spin svg {
+  animation: spin 1s linear infinite;
+}
+
 /* Modal Form Fields */
 .modal-body {
   padding: 16px 18px 0;
@@ -1052,6 +1093,18 @@ html, body {
         </button>
       </div>
 
+      <!-- Tombol Ekstrak Gemini AI -->
+      <div class="ai-action-bar" v-if="selectedDoc">
+        <button class="btn-ai-extract" @click="extractWithAI" :disabled="aiLoading">
+          <span class="ai-sparkle-icon" :class="{ spin: aiLoading }">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </span>
+          <span>{{ aiLoading ? 'Membaca dokumen dengan Gemini AI...' : 'Ekstrak Otomatis dengan Gemini AI' }}</span>
+        </button>
+      </div>
+
       <!-- Editable Details -->
       <div class="modal-body">
         <div class="field-group">
@@ -1151,7 +1204,7 @@ html, body {
 const { createApp, ref, computed, onMounted } = Vue;
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwWN9FWwrvWcwe6UkbZ0ZDiefvtvDx9id5eZvKxQK8cdTrM2Zt1urcG8rXnpEJzvh1p_A/exec";
-const CACHE_KEY = "arsipku_docs_cache_v6";
+const CACHE_KEY = "arsipku_docs_cache_v7";
 
 // ── HEURISTIC AUTO-TAGGING REGULASI & KEDINASAN ───────
 function detectDocTag(namaFile = "", perihal = "") {
@@ -1180,6 +1233,7 @@ createApp({
     const allDocs            = ref([]);
     const loading            = ref(false);
     const saving             = ref(false);
+    const aiLoading          = ref(false);
     const search             = ref("");
     const activeTagFilter    = ref("all");
     const activeFormatFilter = ref("all");
@@ -1600,6 +1654,35 @@ createApp({
       }
     }
 
+    async function extractWithAI() {
+      if (!selectedDoc.value || !selectedDoc.value.fileId) return;
+      aiLoading.value = true;
+      showToast("Sedang membaca naskah dengan Gemini AI...");
+      try {
+        const url = new URL(API_URL);
+        url.searchParams.set("action", "ocr");
+        url.searchParams.set("fileId", selectedDoc.value.fileId);
+
+        const res = await fetch(url.toString());
+        const json = await res.json();
+        if (json.status !== "ok" || !json.data) {
+          throw new Error(json.message || "Gagal memproses dokumen dengan AI");
+        }
+
+        const ai = json.data;
+        if (ai.perihal) form.value.perihal = ai.perihal;
+        if (ai.tanggalSurat) form.value.tanggalSurat = String(ai.tanggalSurat).split("T")[0];
+        if (ai.tag) form.value.tag = ai.tag;
+        if (ai.source) form.value.source = ai.source;
+
+        showToast("✨ Berhasil diekstrak oleh Gemini AI!");
+      } catch (err) {
+        showToast("⚠️ " + err.message);
+      } finally {
+        aiLoading.value = false;
+      }
+    }
+
     function quickShare(doc) {
       if (!doc || !doc.linkDrive) return;
       navigator.clipboard.writeText(doc.linkDrive).catch(() => {});
@@ -1628,7 +1711,7 @@ createApp({
       tagColorClass, statusColorClass, formatDate, forceRefresh,
       setTagFilter, setFormatFilter, onSearchInput, clearSearch,
       resetFilters, changePage, openModal, closeModal, saveDoc,
-      deleteDoc, quickShare
+      deleteDoc, quickShare, aiLoading, extractWithAI
     };
   }
 }).mount("#app");
