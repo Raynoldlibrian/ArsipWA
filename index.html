@@ -396,15 +396,13 @@ html, body {
 }
 
 .doc-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.45;
   color: var(--text-main);
-  margin-bottom: 3px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin-bottom: 4px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .doc-rawname {
@@ -412,9 +410,8 @@ html, body {
   font-size: 10.5px;
   color: var(--text-muted);
   margin-bottom: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-all;
+  line-height: 1.35;
 }
 
 .badge-row {
@@ -1124,7 +1121,7 @@ html, body {
 const { createApp, ref, computed, onMounted } = Vue;
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwWN9FWwrvWcwe6UkbZ0ZDiefvtvDx9id5eZvKxQK8cdTrM2Zt1urcG8rXnpEJzvh1p_A/exec";
-const CACHE_KEY = "arsipku_docs_cache_v3";
+const CACHE_KEY = "arsipku_docs_cache_v4";
 
 // ── HEURISTIC AUTO-TAGGING REGULASI & KEDINASAN ───────
 function detectDocTag(namaFile = "", perihal = "") {
@@ -1172,21 +1169,39 @@ createApp({
 
     // ── DATA NORMALIZATION ────────────────────────────
     function normalizeDoc(raw) {
-      const namaFile = String(raw.NAMA_FILE || raw.namaFile || "").trim();
-      const perihal  = String(raw.PERIHAL || raw.perihal || "").trim();
+      let namaFile = String(raw.NAMA_FILE || raw.namaFile || "").trim();
+      let perihal  = String(raw.PERIHAL || raw.perihal || "").trim();
+      let source   = String(raw.SOURCE || raw.source || "").trim();
+      let tanggal  = raw.TANGGAL || raw.tanggal || "";
+      let linkDrive= String(raw.LINK_DRIVE || raw.linkDrive || "").trim();
+      const fileId = String(raw.FILE_ID || raw.fileId || raw.id || "").trim();
+
+      // SELF-HEALING: Perbaiki baris jika kolom spreadsheet sempat tergeser
+      if ((namaFile.toUpperCase() === "PDF" || namaFile.toUpperCase() === "WORD" || namaFile.toUpperCase() === "EXCEL") && typeof tanggal === "string" && tanggal.toLowerCase().includes(".pdf")) {
+        const realNamaFile = tanggal;
+        const realPerihal  = (perihal || source || "").trim();
+        namaFile = realNamaFile;
+        perihal  = realPerihal;
+      }
+
+      // JAMINAN LINK: Pastikan URL linkDrive selalu valid ke Google Drive asli (mencegah 404)
+      if (!linkDrive.startsWith("http") && fileId) {
+        linkDrive = `https://drive.google.com/file/d/${fileId}/view?usp=drivesdk`;
+      }
+
       const detectedTag = raw.TAG || raw.tag || detectDocTag(namaFile, perihal);
 
       return {
-        fileId      : String(raw.FILE_ID || raw.fileId || raw.id || ""),
+        fileId      : fileId,
         namaFile    : namaFile,
         perihal     : perihal,
         kategori    : String(raw.KATEGORI || raw.kategori || "PDF").trim(),
-        source      : String(raw.SOURCE || raw.source || "").trim(),
+        source      : source,
         status      : String(raw.STATUS || raw.status || "BARU").trim(),
         ocrStatus   : String(raw.OCR_STATUS || raw.ocrStatus || "PENDING").trim(),
-        tanggal     : raw.TANGGAL || raw.tanggal || "",
+        tanggal     : tanggal,
         tanggalSurat: raw.TANGGAL_SURAT ? String(raw.TANGGAL_SURAT).split("T")[0] : (raw.tanggalSurat ? String(raw.tanggalSurat).split("T")[0] : ""),
-        linkDrive   : raw.LINK_DRIVE || raw.linkDrive || (raw.FILE_ID ? `https://drive.google.com/file/d/${raw.FILE_ID}/view` : "#"),
+        linkDrive   : linkDrive,
         tag         : detectedTag,
       };
     }
