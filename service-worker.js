@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arsipku-v2';
+const CACHE_NAME = 'arsipku-v3';
 const assets = [
   '/',
   '/index.html',
