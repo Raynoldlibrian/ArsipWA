@@ -462,30 +462,62 @@ html, body {
 
 .card-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   margin-top: 10px;
-  padding-top: 9px;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
+  gap: 10px;
 }
 
-.footer-info {
+.footer-left {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.footer-filename {
+  font-family: var(--font-mono);
   font-size: 10.5px;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.footer-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
 .footer-date {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-weight: 500;
 }
-.footer-source {
-  display: flex;
-  align-items: center;
-  gap: 3px;
+
+.footer-source-txt {
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.field-static-val {
+  padding: 8px 11px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  word-break: break-all;
 }
 
 .card-action-btn {
@@ -918,7 +950,6 @@ html, body {
 
         <div class="card-content">
           <h3 class="doc-title">{{ doc.perihal || doc.namaFile }}</h3>
-          <div class="doc-rawname" v-if="doc.perihal && doc.perihal !== doc.namaFile">{{ doc.namaFile }}</div>
           
           <div class="badge-row">
             <!-- Regulasi Tag Badge -->
@@ -930,27 +961,27 @@ html, body {
       </div>
 
       <div class="card-footer">
-        <div class="footer-info">
-          <div class="footer-date" v-if="doc.tanggalSurat" style="color:var(--text-main);font-weight:600">
-            <!-- Calendar SVG -->
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <span>{{ formatDate(doc.tanggalSurat) }}</span>
+        <div class="footer-left">
+          <!-- Nama file di kiri bawah (jika judul di atas memakai perihal) -->
+          <div class="footer-filename" v-if="doc.perihal && doc.perihal !== doc.namaFile">
+            {{ doc.namaFile }}
           </div>
-          <div class="footer-date" v-else>
-            <span>{{ formatDate(doc.tanggal) }}</span>
-          </div>
-
-          <div class="footer-source" v-if="doc.source">
-            <span>· {{ doc.source }}</span>
+          <!-- Info tanggal & sumber di kiri bawah -->
+          <div class="footer-meta-row">
+            <span class="footer-date" v-if="doc.tanggalSurat">
+              📅 {{ formatDate(doc.tanggalSurat) }}
+            </span>
+            <span class="footer-date" v-else-if="doc.tanggal">
+              📥 {{ formatDate(doc.tanggal) }}
+            </span>
+            <span class="footer-source-txt" v-if="doc.source && doc.source !== doc.perihal">
+              · {{ doc.source }}
+            </span>
           </div>
         </div>
 
+        <!-- Kanan bawah: HANYA tombol link Drive -->
         <button class="card-action-btn" @click.stop="quickShare(doc)" title="Salin link Google Drive">
-          <!-- Link SVG -->
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
@@ -1066,6 +1097,13 @@ html, body {
             <input class="field-input" type="date" v-model="form.tanggalSurat">
           </div>
           <div class="field-group">
+            <label class="field-label">Tanggal Masuk (Sync)</label>
+            <input class="field-input" type="date" v-model="form.tanggal">
+          </div>
+        </div>
+
+        <div class="field-grid-2">
+          <div class="field-group">
             <label class="field-label">Format File</label>
             <select class="field-select" v-model="form.kategori">
               <option value="PDF">PDF</option>
@@ -1076,23 +1114,15 @@ html, body {
               <option value="Gambar">Gambar</option>
             </select>
           </div>
+          <div class="field-group">
+            <label class="field-label">Sumber Dokumen</label>
+            <input class="field-input" type="text" v-model="form.source" placeholder="Contoh: WhatsApp, Bagian Organisasi...">
+          </div>
         </div>
 
-        <div class="field-group">
-          <label class="field-label">Sumber Dokumen</label>
-          <input class="field-input" type="text" v-model="form.source" placeholder="Contoh: WhatsApp, Bagian Organisasi, BKP2D...">
-        </div>
-
-        <!-- Read-only File Origin Info -->
-        <div class="field-read-info" v-if="selectedDoc">
-          <div class="read-row">
-            <span class="read-lbl">File Asli:</span>
-            <span class="read-val">{{ selectedDoc.namaFile }}</span>
-          </div>
-          <div class="read-row">
-            <span class="read-lbl">Tgl Masuk:</span>
-            <span class="read-val">{{ formatDate(selectedDoc.tanggal) }}</span>
-          </div>
+        <div class="field-group" v-if="selectedDoc">
+          <label class="field-label">Nama File Asli</label>
+          <div class="field-static-val">{{ selectedDoc.namaFile }}</div>
         </div>
       </div>
 
@@ -1121,7 +1151,7 @@ html, body {
 const { createApp, ref, computed, onMounted } = Vue;
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwWN9FWwrvWcwe6UkbZ0ZDiefvtvDx9id5eZvKxQK8cdTrM2Zt1urcG8rXnpEJzvh1p_A/exec";
-const CACHE_KEY = "arsipku_docs_cache_v4";
+const CACHE_KEY = "arsipku_docs_cache_v6";
 
 // ── HEURISTIC AUTO-TAGGING REGULASI & KEDINASAN ───────
 function detectDocTag(namaFile = "", perihal = "") {
@@ -1164,29 +1194,68 @@ createApp({
 
     const form = ref({
       fileId:"", namaFile:"", perihal:"", kategori:"PDF",
-      source:"", status:"BARU", tanggalSurat:"", tag:"Lainnya"
+      source:"", status:"BARU", tanggal:"", tanggalSurat:"", tag:"Lainnya"
     });
 
     // ── DATA NORMALIZATION ────────────────────────────
     function normalizeDoc(raw) {
+      let fileId = String(raw.FILE_ID || raw.fileId || raw.id || "").trim();
+      let tanggal = raw.TANGGAL || raw.tanggal || "";
       let namaFile = String(raw.NAMA_FILE || raw.namaFile || "").trim();
-      let perihal  = String(raw.PERIHAL || raw.perihal || "").trim();
-      let source   = String(raw.SOURCE || raw.source || "").trim();
-      let tanggal  = raw.TANGGAL || raw.tanggal || "";
-      let linkDrive= String(raw.LINK_DRIVE || raw.linkDrive || "").trim();
-      const fileId = String(raw.FILE_ID || raw.fileId || raw.id || "").trim();
+      let linkDrive = String(raw.LINK_DRIVE || raw.linkDrive || "").trim();
+      let kategori = String(raw.KATEGORI || raw.kategori || "").trim();
+      let source = String(raw.SOURCE || raw.source || "").trim();
+      let status = String(raw.STATUS || raw.status || "BARU").trim();
+      let ocrStatus = String(raw.OCR_STATUS || raw.ocrStatus || "PENDING").trim();
+      let perihal = String(raw.PERIHAL || raw.perihal || "").trim();
+      let tanggalSurat = raw.TANGGAL_SURAT ? String(raw.TANGGAL_SURAT).split("T")[0] : (raw.tanggalSurat ? String(raw.tanggalSurat).split("T")[0] : "");
 
-      // SELF-HEALING: Perbaiki baris jika kolom spreadsheet sempat tergeser
+      // SELF-HEALING: Deteksi & pulihkan baris jika kolom spreadsheet sempat tergeser
       if ((namaFile.toUpperCase() === "PDF" || namaFile.toUpperCase() === "WORD" || namaFile.toUpperCase() === "EXCEL") && typeof tanggal === "string" && tanggal.toLowerCase().includes(".pdf")) {
         const realNamaFile = tanggal;
         const realPerihal  = (perihal || source || "").trim();
+        const realSource   = (linkDrive && !linkDrive.startsWith("http")) ? linkDrive.trim() : "WhatsApp";
+        const realTglSurat = (ocrStatus && (ocrStatus.includes("-") || ocrStatus.includes("/"))) ? ocrStatus.split("T")[0] : "";
+        const dateMatch    = realNamaFile.match(/^(\d{4}[-_]\d{2}[-_]\d{2})/);
+        const realTanggal  = dateMatch ? dateMatch[1].replace(/_/g, "-") : "";
+
         namaFile = realNamaFile;
         perihal  = realPerihal;
+        source   = realSource;
+        tanggal  = realTanggal;
+        tanggalSurat = realTglSurat;
+        kategori = "PDF";
+        status   = "BARU";
+      }
+
+      // Bersihkan source jika tidak sengaja terisi teks perihal yang panjang
+      if (source && perihal && (source.toLowerCase() === perihal.toLowerCase() || source.length > 50)) {
+        source = "WhatsApp";
+      }
+
+      // Pastikan format file (kategori) selalu valid & terisi otomatis dari ekstensi
+      const validKat = ["PDF", "Word", "Excel", "PowerPoint", "ZIP/RAR", "Gambar"];
+      if (!validKat.includes(kategori)) {
+        const lower = namaFile.toLowerCase();
+        if (lower.endsWith(".pdf")) kategori = "PDF";
+        else if (lower.endsWith(".doc") || lower.endsWith(".docx")) kategori = "Word";
+        else if (lower.endsWith(".xls") || lower.endsWith(".xlsx")) kategori = "Excel";
+        else if (lower.endsWith(".ppt") || lower.endsWith(".pptx")) kategori = "PowerPoint";
+        else if (lower.endsWith(".zip") || lower.endsWith(".rar")) kategori = "ZIP/RAR";
+        else kategori = "PDF";
       }
 
       // JAMINAN LINK: Pastikan URL linkDrive selalu valid ke Google Drive asli (mencegah 404)
       if (!linkDrive.startsWith("http") && fileId) {
         linkDrive = `https://drive.google.com/file/d/${fileId}/view?usp=drivesdk`;
+      }
+
+      // Format tanggal ISO bersih
+      let cleanTanggal = "";
+      if (tanggal) {
+        if (String(tanggal).includes("T")) cleanTanggal = String(tanggal).split("T")[0];
+        else if (String(tanggal).match(/^\d{4}-\d{2}-\d{2}/)) cleanTanggal = String(tanggal).slice(0, 10);
+        else cleanTanggal = String(tanggal);
       }
 
       const detectedTag = raw.TAG || raw.tag || detectDocTag(namaFile, perihal);
@@ -1195,12 +1264,12 @@ createApp({
         fileId      : fileId,
         namaFile    : namaFile,
         perihal     : perihal,
-        kategori    : String(raw.KATEGORI || raw.kategori || "PDF").trim(),
+        kategori    : kategori,
         source      : source,
-        status      : String(raw.STATUS || raw.status || "BARU").trim(),
-        ocrStatus   : String(raw.OCR_STATUS || raw.ocrStatus || "PENDING").trim(),
-        tanggal     : tanggal,
-        tanggalSurat: raw.TANGGAL_SURAT ? String(raw.TANGGAL_SURAT).split("T")[0] : (raw.tanggalSurat ? String(raw.tanggalSurat).split("T")[0] : ""),
+        status      : status,
+        ocrStatus   : ocrStatus,
+        tanggal     : cleanTanggal,
+        tanggalSurat: tanggalSurat,
         linkDrive   : linkDrive,
         tag         : detectedTag,
       };
@@ -1445,9 +1514,10 @@ createApp({
           namaFile    : doc.namaFile,
           perihal     : doc.perihal,
           kategori    : doc.kategori || "PDF",
-          source      : doc.source || "",
+          source      : (doc.source && doc.source !== doc.perihal) ? doc.source : "",
           status      : doc.status || "BARU",
-          tanggalSurat: doc.tanggalSurat || "",
+          tanggal     : doc.tanggal ? String(doc.tanggal).slice(0, 10) : "",
+          tanggalSurat: doc.tanggalSurat ? String(doc.tanggalSurat).slice(0, 10) : "",
           tag         : doc.tag || "Lainnya"
         };
       }
@@ -1478,6 +1548,7 @@ createApp({
               kategori    : form.value.kategori,
               source      : form.value.source,
               status      : form.value.status,
+              tanggal     : form.value.tanggal,
               tanggalSurat: form.value.tanggalSurat,
               tag         : form.value.tag,
             };
@@ -1492,6 +1563,7 @@ createApp({
           url.searchParams.set("kategori", form.value.kategori);
           url.searchParams.set("source", form.value.source);
           url.searchParams.set("status", form.value.status);
+          url.searchParams.set("tanggal", form.value.tanggal);
           url.searchParams.set("tanggalSurat", form.value.tanggalSurat);
 
           fetch(url.toString()).catch(e => console.warn(e));
