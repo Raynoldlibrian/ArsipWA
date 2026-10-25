@@ -1204,7 +1204,7 @@ html, body {
 const { createApp, ref, computed, onMounted } = Vue;
 
 const API_URL = "https://script.google.com/macros/s/AKfycbzWza--TrKnmtQS7WyBWdNlKBgRso5T3WQYPdD8GYqLllDl46mD0ynZV-3BF9dH64IIXg/exec";
-const CACHE_KEY = "arsipku_docs_cache_v8";
+const CACHE_KEY = "arsipku_docs_cache_v9";
 
 // ── HEURISTIC AUTO-TAGGING REGULASI & KEDINASAN ───────
 function detectDocTag(namaFile = "", perihal = "") {
@@ -1509,20 +1509,52 @@ createApp({
       try {
         const url = new URL(API_URL);
         url.searchParams.set("action", "list");
+        url.searchParams.set("limit", "100");
+        url.searchParams.set("page", "1");
         const res = await fetch(url.toString());
         const json = await res.json();
         if (json.status !== "ok") throw new Error(json.message || "Gagal sinkron");
 
-        const rawList = (json.data && json.data.data) ? json.data.data : (json.data && json.data.docs ? json.data.docs : []);
+        let rawList = (json.data && json.data.docs) ? [...json.data.docs] : ((json.data && json.data.data) ? [...json.data.data] : (Array.isArray(json.data) ? [...json.data] : []));
+        const totalPages = (json.data && json.data.totalPages) ? parseInt(json.data.totalPages) : 1;
+
+        if (totalPages > 1) {
+          const promises = [];
+          for (let p = 2; p <= totalPages; p++) {
+            const pUrl = new URL(API_URL);
+            pUrl.searchParams.set("action", "list");
+            pUrl.searchParams.set("limit", "100");
+            pUrl.searchParams.set("page", String(p));
+            promises.push(
+              fetch(pUrl.toString())
+                .then(r => r.json())
+                .then(j => (j && j.data && j.data.docs ? j.data.docs : ((j && j.data && j.data.data) ? j.data.data : [])))
+                .catch(err => {
+                  console.warn("Gagal mengambil halaman " + p, err);
+                  return [];
+                })
+            );
+          }
+          const restPages = await Promise.all(promises);
+          restPages.forEach(docs => {
+            if (Array.isArray(docs)) {
+              rawList = rawList.concat(docs);
+            }
+          });
+        }
+
         const normalized = rawList.map(normalizeDoc);
         allDocs.value = normalized;
         saveCache(normalized);
+        if (!silent) {
+          showToast(`Berhasil menyinkronkan ${normalized.length} dokumen`);
+        }
       } catch (e) {
         console.error(e);
         if (allDocs.value.length === 0) {
           showToast("Koneksi gagal, silakan coba lagi");
         } else {
-          showToast("Menggunakan data lokal tersimpan");
+          showToast("Menggunakan data lokal tersimpan (" + allDocs.value.length + " dokumen)");
         }
       } finally {
         loading.value = false;
